@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 
 	"github.com/unixpickle/num-analysis/kahan"
 )
@@ -10,8 +11,9 @@ const SeriesSize = 100000000
 
 func main() {
 	nums := make([]float64, SeriesSize)
+	perm := rand.Perm(len(nums))
 	for i := range nums {
-		nums[i] = float64(i) / 13
+		nums[perm[i]] = float64(i) / 13
 	}
 	fmt.Printf("Naive sum: %.10f\n", naiveSum(nums))
 	fmt.Printf("Kahan sum: %.10f\n", kahan.Sum64(nums))
