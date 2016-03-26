@@ -7,6 +7,12 @@ type Matrix struct {
 	V []float64
 }
 
+// NewMatrix creates a matrix of a certain size.
+// The resulting matrix is initialized with zeroes.
+func NewMatrix(size int) *Matrix {
+	return &Matrix{N: size, V: make([]float64, size*size)}
+}
+
 // Get returns the element at the i-th row and j-th column,
 // where indices start at 0.
 func (m *Matrix) Get(i, j int) float64 {
