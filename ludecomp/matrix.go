@@ -15,7 +15,7 @@ func (m *Matrix) Get(i, j int) float64 {
 
 // Set updates the element at the i-th row and j-th column,
 // where indices start at 0.
-func (m *Matrix) Set(v float64, i, j int) {
+func (m *Matrix) Set(i, j int, v float64) {
 	m.V[j+i*m.N] = v
 }
 

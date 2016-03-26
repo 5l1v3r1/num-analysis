@@ -5,6 +5,15 @@ package ludecomp
 // []int{0, 1, 2, ...}.
 type Perm []int
 
+// IdentityPerm returns a permutation of size n that does nothing.
+func IdentityPerm(n int) Perm {
+	res := make(Perm, n)
+	for i := range res {
+		res[i] = i
+	}
+	return res
+}
+
 // Apply generates a new Vector a Perm to a Vector.
 // The Perm must be the same size as the vector.
 func (p Perm) Apply(vec Vector) Vector {
@@ -16,6 +25,13 @@ func (p Perm) Apply(vec Vector) Vector {
 		res[i] = vec[x]
 	}
 	return res
+}
+
+// Swap applies a swap to this permutation.
+// The permutation p becomes a new permutation which is
+// equivalent to applying the old one, then applying a swap.
+func (p Perm) Swap(i, j int) {
+	p[i], p[j] = p[j], p[i]
 }
 
 // Inverse returns the inverse of this permutation.
