@@ -1,5 +1,7 @@
 package ludecomp
 
+import "fmt"
+
 // Matrix represents a square matrix of size N.
 // The values in V are packed from right to left, then top to bottom.
 type Matrix struct {
@@ -32,9 +34,10 @@ func (m *Matrix) SolveLowerTriangular(b Vector) Vector {
 	solution := make(Vector, len(b))
 	for i := 0; i < m.N; i++ {
 		answer := b[i]
-		for j := 0; j < i-1; j++ {
+		for j := 0; j < i; j++ {
 			answer -= m.Get(i, j) * solution[j]
 		}
+		fmt.Println("answer at", i, "is", answer, "/", m.Get(i, i))
 		answer /= m.Get(i, i)
 		solution[i] = answer
 	}

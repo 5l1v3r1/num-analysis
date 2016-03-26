@@ -3,6 +3,8 @@ package ludecomp
 import (
 	"math"
 	"testing"
+
+	"github.com/unixpickle/num-analysis/kahan"
 )
 
 func TestBackSubstitution(t *testing.T) {
@@ -18,16 +20,20 @@ func TestBackSubstitution(t *testing.T) {
 	lowerSolution := m1.SolveLowerTriangular(Vector{1, 2, 3, 4})
 	upperSolution := m1.SolveUpperTriangular(Vector{1, 2, 3, 4})
 
-	expectedLower := Vector{1 / 3, 10 / 57, -55 / 171, 6317 / 8810}
+	expectedLower := Vector{1.0 / 3.0, 10.0 / 57.0, -55.0 / 171.0, 6317.0 / 8810.0}
 	expectedUpper := Vector{12, 20, -17, 4}
-	if math.Abs(cosTheta(lowerSolution, expectedLower)-1) > 0.0001 {
-		t.Error("incorrect lower triangular solution")
+	if vectorDiff(lowerSolution, expectedLower) > 0.0001 {
+		t.Error("incorrect lower triangular solution", lowerSolution)
 	}
-	if math.Abs(cosTheta(upperSolution, expectedUpper)-1) > 0.0001 {
+	if vectorDiff(upperSolution, expectedUpper) > 0.0001 {
 		t.Error("incorrect upper triangular solution", upperSolution)
 	}
 }
 
-func cosTheta(v1, v2 Vector) float64 {
-	return v1.Dot(v2) / math.Sqrt(v1.Dot(v1)*v2.Dot(v2))
+func vectorDiff(v1, v2 Vector) float64 {
+	diffList := make([]float64, len(v1))
+	for i, x := range v1 {
+		diffList[i] = math.Pow(x-v2[i], 2)
+	}
+	return math.Sqrt(kahan.Sum64(diffList))
 }
