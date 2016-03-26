@@ -40,16 +40,12 @@ func Decompose(m *Matrix) *LU {
 		if pivotRow != i {
 			res.swapRows(i, pivotRow)
 		}
-		scaler := 1.0 / res.LU.Get(i, i)
-		res.LU.Set(i, i, scaler)
-		for k := i + 1; k < m.N; k++ {
-			v := res.LU.Get(i, k)
-			res.LU.Set(i, k, v*scaler)
-		}
-		for k := i + 1; k < m.N; k++ {
-			v := res.LU.Get(k, i)
-			res.LU.Set(k, i, scaler*v)
-		}
+		pivot := res.LU.Get(i, i)
+		res.upperTriangularElimination(i, pivot)
+
+		// As doing some math will show, the entries of L are the same
+		// as the lower-triangular entries of the original matrix, so
+		// no further computation needs to be done to compute these entries.
 	}
 	res.OutPerm = res.OutPerm.Inverse()
 	return res
@@ -59,8 +55,8 @@ func Decompose(m *Matrix) *LU {
 // decomposed matrix represented by l.
 func (l *LU) Solve(v Vector) Vector {
 	in := l.InPerm.Apply(v)
-	sol1 := l.LU.SolveUpperTriangular(in)
-	sol2 := l.LU.SolveLowerTriangular(sol1)
+	sol1 := l.LU.SolveLowerTriangular(in)
+	sol2 := l.LU.SolveUpperTriangular(sol1)
 	return l.OutPerm.Apply(sol2)
 }
 
@@ -92,11 +88,38 @@ func (l *LU) swapColumns(i, j int) {
 }
 
 func (l *LU) swapRows(step, pivotRow int) {
+	// By swapping the rows of the upper and lower triangular
+	// matrices simultaneously, we make up for the fact that we
+	// cannot entirely swap rows of either of the two matrices
+	// without losing triangularity.
+
+	// It can be shown that the resulting product LU is equivalent
+	// to fully swapping the rows of the lower-triangular matrix,
+	// making it non-triangular.
 	l.InPerm.Swap(step, pivotRow)
-	for i := 0; i < step; i++ {
+	for i := 0; i < l.LU.N; i++ {
 		val1 := l.LU.Get(step, i)
 		val2 := l.LU.Get(pivotRow, i)
 		l.LU.Set(pivotRow, i, val1)
 		l.LU.Set(step, i, val2)
+	}
+}
+
+func (l *LU) upperTriangularElimination(step int, pivot float64) {
+	// Divide the current row by the pivot.
+	invPivot := 1 / pivot
+	for col := step + 1; col < l.LU.N; col++ {
+		v := l.LU.Get(step, col)
+		l.LU.Set(step, col, v*invPivot)
+	}
+
+	// Subtract the current row from subsequent rows.
+	for row := step + 1; row < l.LU.N; row++ {
+		subScale := l.LU.Get(row, step)
+		for col := step + 1; col < l.LU.N; col++ {
+			val := l.LU.Get(row, col)
+			subVal := l.LU.Get(step, col)
+			l.LU.Set(row, col, val-subVal*subScale)
+		}
 	}
 }
