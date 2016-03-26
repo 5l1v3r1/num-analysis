@@ -2,7 +2,7 @@ package ludecomp
 
 import "testing"
 
-func TestSolve3x3(t *testing.T) {
+func TestSolve4x4(t *testing.T) {
 	m := &Matrix{
 		N: 4,
 		V: []float64{
