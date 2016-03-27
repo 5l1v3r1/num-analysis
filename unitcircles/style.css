@@ -1,0 +1,8 @@
+body {
+  text-align: center;
+}
+
+#slider {
+  display: inline-block;
+  width: 300px;
+}
