@@ -5,3 +5,4 @@ I am learning some Numerical Analysis from [video lectures](https://www.youtube.
 # Contents
 
  * [kahan](kahan/) - a simple algorithm for summing up numbers without error.
+ * [ludecomp](ludecomp/) - decompose a matrix A into PAQ=LU, then use the factorized form to solve Ax=b.
