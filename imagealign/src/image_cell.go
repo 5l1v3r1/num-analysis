@@ -65,6 +65,7 @@ func NewImageCell(label string) *ImageCell {
 
 	input.Call("addEventListener", "change", res.inputChanged)
 	clearButton.Call("addEventListener", "click", res.resetPoints)
+	canvas.Call("addEventListener", "click", res.addPoint)
 
 	res.updateUI()
 
@@ -127,4 +128,14 @@ func (i *ImageCell) updateUI() {
 		ctx.Call("closePath")
 		ctx.Call("fill")
 	}
+}
+
+func (i *ImageCell) addPoint(e *js.Object) {
+	rect := i.Canvas.Call("getBoundingClientRect")
+	left := rect.Get("left").Float()
+	top := rect.Get("top").Float()
+	pointLeft := e.Get("clientX").Float() - left
+	pointTop := e.Get("clientY").Float() - top
+	i.Points = append(i.Points, Point{pointLeft, pointTop})
+	i.updateUI()
 }
