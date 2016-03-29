@@ -1,6 +1,9 @@
 package ludecomp
 
-import "testing"
+import (
+	"math/rand"
+	"testing"
+)
 
 func TestSolve4x4(t *testing.T) {
 	m := &Matrix{
@@ -28,4 +31,56 @@ func TestSolve4x4(t *testing.T) {
 			t.Error("Test", i, "expected", expected[i], "but got", out)
 		}
 	}
+}
+
+func BenchmarkDecompose200x200(b *testing.B) {
+	mat := randMatrix(200)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Decompose(mat)
+	}
+}
+
+func BenchmarkDecompose100x100(b *testing.B) {
+	mat := randMatrix(100)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		Decompose(mat)
+	}
+}
+
+func BenchmarkSolve800x800(b *testing.B) {
+	lu := Decompose(randMatrix(800))
+	vec := randVec(800)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		lu.Solve(vec)
+	}
+}
+
+func BenchmarkSolve400x400(b *testing.B) {
+	lu := Decompose(randMatrix(400))
+	vec := randVec(400)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		lu.Solve(vec)
+	}
+}
+
+func randMatrix(size int) *Matrix {
+	res := NewMatrix(size)
+	for i := 0; i < res.N; i++ {
+		for j := 0; j < res.N; j++ {
+			res.Set(i, j, rand.Float64())
+		}
+	}
+	return res
+}
+
+func randVec(size int) Vector {
+	res := make(Vector, size)
+	for i := 0; i < size; i++ {
+		res[i] = rand.Float64()
+	}
+	return res
 }
