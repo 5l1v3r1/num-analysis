@@ -41,7 +41,7 @@ func Decompose(matrix *ludecomp.Matrix) *Cholesky {
 			summer = kahan.NewSummer64()
 			summer.Add(matrix.Get(lowerColumn, lowerRow))
 			for i := 0; i < lowerColumn; i++ {
-				summer.Add(-res.Get(lowerColumn, i) * res.Get(i, lowerRow))
+				summer.Add(-res.Get(lowerColumn, i) * res.Get(lowerRow, i))
 			}
 			sum := summer.Sum()
 			res.set(lowerRow, lowerColumn, sum/diagEntry)
@@ -100,7 +100,7 @@ func (c *Cholesky) backSubstituteLower(b ludecomp.Vector) ludecomp.Vector {
 		summer := kahan.NewSummer64()
 		summer.Add(b[i])
 		for j := 0; j < i; j++ {
-			summer.Add(-b[j] * c.Get(i, j))
+			summer.Add(-solution[j] * c.Get(i, j))
 		}
 		solution[i] = summer.Sum() / c.Get(i, i)
 	}
