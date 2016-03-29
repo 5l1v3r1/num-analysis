@@ -73,6 +73,15 @@ func NewImageCell(label string) *ImageCell {
 	return res
 }
 
+func (i *ImageCell) ScaledPoints() []Point {
+	scale := i.Canvas.Get("width").Float() / imageSize
+	res := make([]Point, len(i.Points))
+	for i, p := range i.Points {
+		res[i] = Point{p.X * scale, p.Y * scale}
+	}
+	return res
+}
+
 func (i *ImageCell) inputChanged(event *js.Object) {
 	file := event.Get("target").Get("files").Index(0)
 	if file == nil {

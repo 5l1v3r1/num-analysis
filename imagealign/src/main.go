@@ -31,7 +31,7 @@ func alignImage() {
 	if len(StraightCell.Points) < minPointCount {
 		alert(fmt.Sprintf("need at least %d points", minPointCount))
 	}
-	trans := ApproxTransformation(StraightCell.Points, CrookedCell.Points)
+	trans := ApproxTransformation(StraightCell.ScaledPoints(), CrookedCell.ScaledPoints())
 	crookedBitmap := NewBitmapCanvas(CrookedCell.Canvas)
 	newBitmap := NewBitmap(crookedBitmap.Width)
 	for x := 0; x < newBitmap.Width; x++ {

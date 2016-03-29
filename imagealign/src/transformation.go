@@ -19,7 +19,7 @@ func ApproxTransformation(source, destination []Point) *Transformation {
 
 	results := make(ludecomp.Vector, len(destination)*2)
 	for i, point := range destination {
-		twoI := i
+		twoI := i * 2
 		results[twoI] = point.X
 		results[twoI+1] = point.Y
 	}
