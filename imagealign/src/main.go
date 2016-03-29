@@ -42,7 +42,13 @@ func alignImage() {
 		}
 	}
 	newBitmap.Flush()
-	js.Global.Get("document").Get("body").Call("appendChild", newBitmap.Canvas)
+	body := js.Global.Get("document").Get("body")
+	oldCanvas := js.Global.Get("document").Call("getElementById", "output-canvas")
+	if oldCanvas != nil {
+		body.Call("removeChild", oldCanvas)
+	}
+	newBitmap.Canvas.Set("id", "output-canvas")
+	body.Call("appendChild", newBitmap.Canvas)
 }
 
 func alert(msg string) {
