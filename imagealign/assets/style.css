@@ -1,0 +1,20 @@
+body {
+  margin: 0;
+  text-align: center;
+}
+
+#align {
+  margin-top: 10px;
+}
+
+.image-picker {
+  text-align: left;
+  margin: 5px;
+  display: inline-block;
+}
+
+.image-picker > h1 {
+  text-align: center;
+  margin: 0;
+  padding: 0;
+}

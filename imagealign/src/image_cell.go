@@ -10,7 +10,7 @@ import (
 const imageSize = 300
 const dotRadius = 4
 
-var dotColors = []string{"blue", "red", "green", "yellow", "purple"}
+var dotColors = []string{"#65bcd4", "#e36a8f", "#32be6e", "#f19e4d", "#9b59b6", "#814938"}
 
 type Point struct {
 	X float64
@@ -31,6 +31,7 @@ func NewImageCell(label string) *ImageCell {
 	document := js.Global.Get("document")
 
 	cell := document.Call("createElement", "div")
+	cell.Set("className", "image-picker")
 	title := document.Call("createElement", "h1")
 	title.Set("textContent", label)
 	input := document.Call("createElement", "input")
