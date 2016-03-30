@@ -102,7 +102,7 @@ func (m *Matrix) Mul(m1 *Matrix) *Matrix {
 	for i := 0; i < res.Rows; i++ {
 		for j := 0; j < res.Cols; j++ {
 			summer := kahan.NewSummer64()
-			for k := 0; k < m.Rows; k++ {
+			for k := 0; k < m.Cols; k++ {
 				summer.Add(m.Get(i, k) * m1.Get(k, j))
 			}
 			res.Data[dataIdx] = summer.Sum()
@@ -112,14 +112,14 @@ func (m *Matrix) Mul(m1 *Matrix) *Matrix {
 	return res
 }
 
-// Transpose transposes m in place and returns m.
+// Transpose returns a new matrix which represents
+// the transpose of m.
 func (m *Matrix) Transpose() *Matrix {
+	res := NewMatrix(m.Cols, m.Rows)
 	for i := 0; i < m.Rows; i++ {
-		for j := 0; j < i; j++ {
-			temp := m.Get(i, j)
-			m.Set(i, j, m.Get(j, i))
-			m.Set(j, i, temp)
+		for j := 0; j < m.Cols; j++ {
+			res.Set(j, i, m.Get(i, j))
 		}
 	}
-	return m
+	return res
 }
