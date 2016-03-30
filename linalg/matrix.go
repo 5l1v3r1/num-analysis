@@ -36,18 +36,12 @@ func NewMatrixIdentity(size int) *Matrix {
 // Get returns the element at the i-th row and
 // the j-th column, where i and j start at 0.
 func (m *Matrix) Get(i, j int) float64 {
-	if i < 0 || j < 0 || i >= m.Rows || j >= m.Cols {
-		panic("index out of bounds")
-	}
 	return m.Data[i*m.Cols+j]
 }
 
 // Set updates the element referenced by i and
 // j, as explained for Get().
 func (m *Matrix) Set(i, j int, val float64) {
-	if i < 0 || j < 0 || i >= m.Rows || j >= m.Cols {
-		panic("index out of bounds")
-	}
 	m.Data[i*m.Cols+j] = val
 }
 
