@@ -5,8 +5,8 @@ I am learning some Numerical Analysis from [video lectures](https://www.youtube.
 # Contents
 
  * [kahan](kahan/) - a simple algorithm for summing up numbers without error.
- * [ludecomp](ludecomp/) - decompose a matrix A into PAQ=LU, then use the factorized form to solve Ax=b.
- * [cholesky](cholesky/) - decompose symmetric positive-definite matrices using Cholesky factorization.
+ * [linalg/ludecomp](linalg/ludecomp/) - decompose a matrix A into PAQ=LU, then use the factorized form to solve Ax=b.
+ * [linalg/cholesky](linalg/cholesky/) - decompose symmetric positive-definite matrices using Cholesky factorization.
  * [unitcircles](unitcircles/) - a simple HTML app to visualize different p-norms.
  * [regression](regression/) - basic regression using least squares.
  * [imagealign](imagealign/) - align a crooked image to a reference image using least squares.
