@@ -1,6 +1,10 @@
-package ludecomp
+package linalg
 
-import "github.com/unixpickle/num-analysis/kahan"
+import (
+	"math"
+
+	"github.com/unixpickle/num-analysis/kahan"
+)
 
 // Vector is an ordered list of floating points
 // which can be manipulated like a vector.
@@ -17,4 +21,33 @@ func (v Vector) Dot(v1 Vector) float64 {
 		summer.Add(x * v1[i])
 	}
 	return summer.Sum()
+}
+
+// Copy returns a copy of this vector.
+func (v Vector) Copy() Vector {
+	res := make(Vector, len(v))
+	copy(res, v)
+	return res
+}
+
+// Scale scales v in place and returns v.
+func (v Vector) Scale(c float64) Vector {
+	for i, x := range v {
+		v[i] = x * c
+	}
+	return v
+}
+
+// Add adds v1 to v in place and returns v.
+func (v Vector) Add(v1 Vector) Vector {
+	for i, x := range v1 {
+		v[i] += x
+	}
+	return v
+}
+
+// Mag returns the magnitude of this vector using
+// a 2-norm.
+func (v Vector) Mag() float64 {
+	return math.Sqrt(v.Dot(v))
 }

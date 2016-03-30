@@ -1,5 +1,7 @@
 package ludecomp
 
+import "github.com/unixpickle/num-analysis/linalg"
+
 // A Perm represents a the result of a permutation on an arbitrary list.
 // A Perm is encoded as the result of applying a permutation to the list
 // []int{0, 1, 2, ...}.
@@ -16,11 +18,11 @@ func IdentityPerm(n int) Perm {
 
 // Apply generates a new Vector a Perm to a Vector.
 // The Perm must be the same size as the vector.
-func (p Perm) Apply(vec Vector) Vector {
+func (p Perm) Apply(vec linalg.Vector) linalg.Vector {
 	if len(p) != len(vec) {
 		panic("dimension mismatch")
 	}
-	res := make(Vector, len(vec))
+	res := make(linalg.Vector, len(vec))
 	for i, x := range p {
 		res[i] = vec[x]
 	}

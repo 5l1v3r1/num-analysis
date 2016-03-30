@@ -12,6 +12,27 @@ type Matrix struct {
 	Data []float64
 }
 
+// NewMatrix creates a matrix of a given size with
+// zeroes in every cell.
+func NewMatrix(rows, cols int) *Matrix {
+	res := &Matrix{
+		Rows: rows,
+		Cols: cols,
+		Data: make([]float64, rows*cols),
+	}
+	return res
+}
+
+// NewMatrixIdentity returns an identity matrix of
+// the given size.
+func NewMatrixIdentity(size int) *Matrix {
+	res := NewMatrix(size, size)
+	for i := 0; i < size; i++ {
+		res.Set(i, i, 1)
+	}
+	return res
+}
+
 // Get returns the element at the i-th row and
 // the j-th column, where i and j start at 0.
 func (m *Matrix) Get(i, j int) float64 {
@@ -47,24 +68,26 @@ func (m *Matrix) Square() bool {
 	return m.Rows == m.Cols
 }
 
-// Scale multiplies this matrix by c in place.
-func (m *Matrix) Scale(c float64) {
+// Scale multiplies m by c in place and returns m.
+func (m *Matrix) Scale(c float64) *Matrix {
 	for i, d := range m.Data {
 		m.Data[i] = d * c
 	}
+	return m
 }
 
-// Add performs matrix addition on m in place, adding
-// the values from m1.
+// Add performs matrix addition on m in place and
+// returns m.
 //
 // The dimensions of m1 must match the dimensions of m.
-func (m *Matrix) Add(m1 *Matrix) {
+func (m *Matrix) Add(m1 *Matrix) *Matrix {
 	if m.Rows != m1.Rows || m.Cols != m1.Cols {
 		panic("dimension mismatch")
 	}
 	for i, d := range m1.Data {
 		m.Data[i] += d
 	}
+	return m
 }
 
 // Mul performs matrix multiplication with m on the
@@ -95,8 +118,8 @@ func (m *Matrix) Mul(m1 *Matrix) *Matrix {
 	return res
 }
 
-// Transpose transposes m in place.
-func (m *Matrix) Transpose() {
+// Transpose transposes m in place and returns m.
+func (m *Matrix) Transpose() *Matrix {
 	for i := 0; i < m.Rows; i++ {
 		for j := 0; j < i; j++ {
 			temp := m.Get(i, j)
@@ -104,4 +127,5 @@ func (m *Matrix) Transpose() {
 			m.Set(j, i, temp)
 		}
 	}
+	return m
 }

@@ -3,12 +3,15 @@ package ludecomp
 import (
 	"math/rand"
 	"testing"
+
+	"github.com/unixpickle/num-analysis/linalg"
 )
 
 func TestSolve4x4(t *testing.T) {
-	m := &Matrix{
-		N: 4,
-		V: []float64{
+	m := &linalg.Matrix{
+		Rows: 4,
+		Cols: 4,
+		Data: []float64{
 			1, 2, 3, 7,
 			4, 5, 6, 9.5,
 			7, 8, 10, 3.2,
@@ -17,13 +20,13 @@ func TestSolve4x4(t *testing.T) {
 	}
 	dec := Decompose(m)
 
-	inputs := []Vector{
-		Vector{1, 2, 3, 7},
-		Vector{1, 2, 5, 2},
+	inputs := []linalg.Vector{
+		{1, 2, 3, 7},
+		{1, 2, 5, 2},
 	}
-	expected := []Vector{
-		Vector{2075.0 / 1589.0, -512.0 / 245.0, 7769.0 / 7612.0, 397.0 / 3423.0},
-		Vector{-223.0 / 193.0, 1329.0 / 941.0, 1925.0 / 7927.0, -371.0 / 1858.0},
+	expected := []linalg.Vector{
+		{2075.0 / 1589.0, -512.0 / 245.0, 7769.0 / 7612.0, 397.0 / 3423.0},
+		{-223.0 / 193.0, 1329.0 / 941.0, 1925.0 / 7927.0, -371.0 / 1858.0},
 	}
 	for i, in := range inputs {
 		out := dec.Solve(in)
@@ -67,18 +70,18 @@ func BenchmarkSolve400x400(b *testing.B) {
 	}
 }
 
-func randMatrix(size int) *Matrix {
-	res := NewMatrix(size)
-	for i := 0; i < res.N; i++ {
-		for j := 0; j < res.N; j++ {
+func randMatrix(size int) *linalg.Matrix {
+	res := linalg.NewMatrix(size, size)
+	for i := 0; i < res.Rows; i++ {
+		for j := 0; j < res.Rows; j++ {
 			res.Set(i, j, rand.Float64())
 		}
 	}
 	return res
 }
 
-func randVec(size int) Vector {
-	res := make(Vector, size)
+func randVec(size int) linalg.Vector {
+	res := make(linalg.Vector, size)
 	for i := 0; i < size; i++ {
 		res[i] = rand.Float64()
 	}

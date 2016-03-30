@@ -1,6 +1,10 @@
 package ludecomp
 
-import "math"
+import (
+	"math"
+
+	"github.com/unixpickle/num-analysis/linalg"
+)
 
 // LU stores all of the information about a matrix
 // that has been decomposed into LU form.
@@ -13,26 +17,29 @@ type LU struct {
 	// LU is a matrix which stores both L and U.
 	// The lower part of this matrix stores L, and
 	// the upper part stores U.
-	LU *Matrix
+	LU *linalg.Matrix
 
 	// InPerm is the permutation that should be applied
-	// to the input vector before solving.
+	// to the input linalg.Vector before solving.
 	InPerm Perm
 
 	// OutPerm is the permutation that should be applied
-	// to the solution vector after solving (LU)x = Pb.
+	// to the solution linalg.Vector after solving (LU)x = Pb.
 	OutPerm Perm
 }
 
-// Decompose generates the LU decomposition for an invertible matrix.
-func Decompose(m *Matrix) *LU {
-	res := &LU{
-		LU:      &Matrix{N: m.N, V: make([]float64, m.N*m.N)},
-		InPerm:  IdentityPerm(m.N),
-		OutPerm: IdentityPerm(m.N),
+// Decompose generates the LU decomposition for a
+// square, invertible matrix m.
+func Decompose(m *linalg.Matrix) *LU {
+	if !m.Square() {
+		panic("dimension mismatch")
 	}
-	copy(res.LU.V, m.V)
-	for i := 0; i < m.N; i++ {
+	res := &LU{
+		LU:      m.Copy(),
+		InPerm:  IdentityPerm(m.Rows),
+		OutPerm: IdentityPerm(m.Rows),
+	}
+	for i := 0; i < m.Rows; i++ {
 		pivotRow, pivotCol := res.bestPivot(i)
 		if pivotCol != i {
 			res.swapColumns(i, pivotCol)
@@ -51,12 +58,12 @@ func Decompose(m *Matrix) *LU {
 	return res
 }
 
-// Solve computes the vector x such that Ax=v, where A is the
+// Solve computes the linalg.Vector x such that Ax=v, where A is the
 // decomposed matrix represented by l.
-func (l *LU) Solve(v Vector) Vector {
+func (l *LU) Solve(v linalg.Vector) linalg.Vector {
 	in := l.InPerm.Apply(v)
-	sol1 := l.LU.SolveLowerTriangular(in)
-	sol2 := l.LU.SolveUpperTriangular(sol1)
+	sol1 := solveLowerTriangular(l.LU, in)
+	sol2 := solveUpperTriangular(l.LU, sol1)
 	return l.OutPerm.Apply(sol2)
 }
 
@@ -64,8 +71,8 @@ func (l *LU) bestPivot(stepsDone int) (row, col int) {
 	var biggestValue float64
 	row = stepsDone
 	col = stepsDone
-	for i := stepsDone; i < l.LU.N; i++ {
-		for j := stepsDone; j < l.LU.N; j++ {
+	for i := stepsDone; i < l.LU.Rows; i++ {
+		for j := stepsDone; j < l.LU.Rows; j++ {
 			x := math.Abs(l.LU.Get(i, j))
 			if x > biggestValue {
 				biggestValue = x
@@ -79,7 +86,7 @@ func (l *LU) bestPivot(stepsDone int) (row, col int) {
 
 func (l *LU) swapColumns(i, j int) {
 	l.OutPerm.Swap(i, j)
-	for k := 0; k < l.LU.N; k++ {
+	for k := 0; k < l.LU.Rows; k++ {
 		v1 := l.LU.Get(k, i)
 		v2 := l.LU.Get(k, j)
 		l.LU.Set(k, i, v2)
@@ -97,7 +104,7 @@ func (l *LU) swapRows(step, pivotRow int) {
 	// to fully swapping the rows of the lower-triangular matrix,
 	// making it non-triangular.
 	l.InPerm.Swap(step, pivotRow)
-	for i := 0; i < l.LU.N; i++ {
+	for i := 0; i < l.LU.Rows; i++ {
 		val1 := l.LU.Get(step, i)
 		val2 := l.LU.Get(pivotRow, i)
 		l.LU.Set(pivotRow, i, val1)
@@ -108,15 +115,15 @@ func (l *LU) swapRows(step, pivotRow int) {
 func (l *LU) upperTriangularElimination(step int, pivot float64) {
 	// Divide the current row by the pivot.
 	invPivot := 1 / pivot
-	for col := step + 1; col < l.LU.N; col++ {
+	for col := step + 1; col < l.LU.Rows; col++ {
 		v := l.LU.Get(step, col)
 		l.LU.Set(step, col, v*invPivot)
 	}
 
 	// Subtract the current row from subsequent rows.
-	for row := step + 1; row < l.LU.N; row++ {
+	for row := step + 1; row < l.LU.Rows; row++ {
 		subScale := l.LU.Get(row, step)
-		for col := step + 1; col < l.LU.N; col++ {
+		for col := step + 1; col < l.LU.Rows; col++ {
 			val := l.LU.Get(row, col)
 			subVal := l.LU.Get(step, col)
 			l.LU.Set(row, col, val-subVal*subScale)
