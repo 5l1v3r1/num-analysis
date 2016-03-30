@@ -5,13 +5,14 @@ import (
 	"math/rand"
 	"testing"
 
-	"github.com/unixpickle/num-analysis/ludecomp"
+	"github.com/unixpickle/num-analysis/linalg"
 )
 
 func TestSolve3x3(t *testing.T) {
-	mat := &ludecomp.Matrix{
-		N: 3,
-		V: []float64{
+	mat := &linalg.Matrix{
+		Rows: 3,
+		Cols: 3,
+		Data: []float64{
 			14, 26, 17,
 			26, 57, 32,
 			17, 32, 25,
@@ -19,14 +20,14 @@ func TestSolve3x3(t *testing.T) {
 	}
 	dec := Decompose(mat)
 
-	problems := []ludecomp.Vector{
+	problems := []linalg.Vector{
 		{1, 2, 3},
 	}
-	solutions := []ludecomp.Vector{
+	solutions := []linalg.Vector{
 		{-222.0 / 529.0, -2.0 / 529.0, 217.0 / 529.0},
 	}
 	for i, problem := range problems {
-		solution := dec.Solve(ludecomp.Vector{1, 2, 3})
+		solution := dec.Solve(linalg.Vector{1, 2, 3})
 		if math.IsNaN(solution[0]) {
 			t.Error("NaN's in solution", solution, "for", problem)
 			continue
@@ -72,7 +73,7 @@ func BenchmarkSolve400x400(b *testing.B) {
 	}
 }
 
-func solutionDiff(s1, s2 ludecomp.Vector) float64 {
+func solutionDiff(s1, s2 linalg.Vector) float64 {
 	var diff float64
 	for i, x := range s1 {
 		diff += math.Pow(x-s2[i], 2)
@@ -80,12 +81,12 @@ func solutionDiff(s1, s2 ludecomp.Vector) float64 {
 	return math.Sqrt(diff)
 }
 
-func randMatrix(size int) *ludecomp.Matrix {
-	vecs := make([]ludecomp.Vector, size)
+func randMatrix(size int) *linalg.Matrix {
+	vecs := make([]linalg.Vector, size)
 	for i := range vecs {
 		vecs[i] = randVec(size)
 	}
-	res := ludecomp.NewMatrix(size)
+	res := linalg.NewMatrix(size, size)
 	for i, v1 := range vecs {
 		for j, v2 := range vecs {
 			res.Set(i, j, v1.Dot(v2))
@@ -94,8 +95,8 @@ func randMatrix(size int) *ludecomp.Matrix {
 	return res
 }
 
-func randVec(size int) ludecomp.Vector {
-	res := make(ludecomp.Vector, size)
+func randVec(size int) linalg.Vector {
+	res := make(linalg.Vector, size)
 	for i := 0; i < size; i++ {
 		res[i] = rand.Float64()
 	}

@@ -4,7 +4,7 @@ import (
 	"math"
 
 	"github.com/unixpickle/num-analysis/kahan"
-	"github.com/unixpickle/num-analysis/ludecomp"
+	"github.com/unixpickle/num-analysis/linalg"
 )
 
 // Cholesky represents the Cholesky decomposition
@@ -22,13 +22,16 @@ type Cholesky struct {
 //
 // The lower-triangular portion of the given matrix
 // will not be accessed.
-func Decompose(matrix *ludecomp.Matrix) *Cholesky {
+func Decompose(matrix *linalg.Matrix) *Cholesky {
+	if !matrix.Square() {
+		panic("dimension mismatch")
+	}
 	res := &Cholesky{
-		size:  matrix.N,
-		lower: make([]float64, matrix.N*(matrix.N+1)/2),
+		size:  matrix.Rows,
+		lower: make([]float64, matrix.Rows*(matrix.Rows+1)/2),
 	}
 
-	for lowerColumn := 0; lowerColumn < matrix.N; lowerColumn++ {
+	for lowerColumn := 0; lowerColumn < matrix.Rows; lowerColumn++ {
 		summer := kahan.NewSummer64()
 		summer.Add(matrix.Get(lowerColumn, lowerColumn))
 		for i := 0; i < lowerColumn; i++ {
@@ -37,7 +40,7 @@ func Decompose(matrix *ludecomp.Matrix) *Cholesky {
 		diagEntry := math.Sqrt(summer.Sum())
 		res.set(lowerColumn, lowerColumn, diagEntry)
 
-		for lowerRow := lowerColumn + 1; lowerRow < matrix.N; lowerRow++ {
+		for lowerRow := lowerColumn + 1; lowerRow < matrix.Rows; lowerRow++ {
 			summer = kahan.NewSummer64()
 			summer.Add(matrix.Get(lowerColumn, lowerRow))
 			for i := 0; i < lowerColumn; i++ {
@@ -73,7 +76,7 @@ func (c *Cholesky) set(row, col int, v float64) {
 }
 
 // Solve solves the system (L*L^T)x = b for x.
-func (c *Cholesky) Solve(b ludecomp.Vector) ludecomp.Vector {
+func (c *Cholesky) Solve(b linalg.Vector) linalg.Vector {
 	if len(b) != c.size {
 		panic("dimension mismatch")
 	}
@@ -81,8 +84,8 @@ func (c *Cholesky) Solve(b ludecomp.Vector) ludecomp.Vector {
 	return c.backSubstituteUpper(s1)
 }
 
-func (c *Cholesky) backSubstituteUpper(b ludecomp.Vector) ludecomp.Vector {
-	solution := make(ludecomp.Vector, len(b))
+func (c *Cholesky) backSubstituteUpper(b linalg.Vector) linalg.Vector {
+	solution := make(linalg.Vector, len(b))
 	for i := len(solution) - 1; i >= 0; i-- {
 		summer := kahan.NewSummer64()
 		summer.Add(b[i])
@@ -94,8 +97,8 @@ func (c *Cholesky) backSubstituteUpper(b ludecomp.Vector) ludecomp.Vector {
 	return solution
 }
 
-func (c *Cholesky) backSubstituteLower(b ludecomp.Vector) ludecomp.Vector {
-	solution := make(ludecomp.Vector, len(b))
+func (c *Cholesky) backSubstituteLower(b linalg.Vector) linalg.Vector {
+	solution := make(linalg.Vector, len(b))
 	for i := range solution {
 		summer := kahan.NewSummer64()
 		summer.Add(b[i])
