@@ -3,7 +3,8 @@ package regression
 import (
 	"math"
 
-	"github.com/unixpickle/num-analysis/ludecomp"
+	"github.com/unixpickle/num-analysis/linalg"
+	"github.com/unixpickle/num-analysis/linalg/cholesky"
 )
 
 // Polynomial represents a polynomial with real coefficients.
@@ -17,31 +18,31 @@ type Polynomial []float64
 // fewer than deg+1 unique Input values, then this may
 // return an incorrect or invalid solution.
 func FitPolynomial(deg int, points []Point) Polynomial {
-	outputs := make(ludecomp.Vector, len(points))
+	outputs := make(linalg.Vector, len(points))
 	for row, p := range points {
 		outputs[row] = p.Output
 	}
 
-	degInputs := make([]ludecomp.Vector, deg+1)
+	degInputs := make([]linalg.Vector, deg+1)
 	for d := range degInputs {
-		v := make(ludecomp.Vector, len(points))
+		v := make(linalg.Vector, len(points))
 		for i, p := range points {
 			v[i] = math.Pow(p.Input, float64(i))
 		}
 		degInputs[d] = v
 	}
 
-	normalMat := ludecomp.NewMatrix(deg + 1)
+	normalMat := linalg.NewMatrix(deg+1, deg+1)
 	for row, v1 := range degInputs {
 		for col, v2 := range degInputs {
 			normalMat.Set(row, col, v1.Dot(v2))
 		}
 	}
 
-	normalOut := make(ludecomp.Vector, deg+1)
+	normalOut := make(linalg.Vector, deg+1)
 	for i := range normalOut {
 		normalOut[i] = degInputs[i].Dot(outputs)
 	}
 
-	return Polynomial(ludecomp.Decompose(normalMat).Solve(normalOut))
+	return Polynomial(cholesky.Decompose(normalMat).Solve(normalOut))
 }
