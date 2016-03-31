@@ -1,11 +1,6 @@
 package qrdecomp
 
-import (
-	"math/rand"
-	"testing"
-
-	"github.com/unixpickle/num-analysis/linalg"
-)
+import "testing"
 
 func TestHouseholderTall(t *testing.T) {
 	testDecomposer(t, test5x3Matrix, Householder, 3)
@@ -53,16 +48,4 @@ func BenchmarkHouseholderReflections50x50(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		HouseholderReflections(mat)
 	}
-}
-
-func randomMatrix(size int) *linalg.Matrix {
-	res := &linalg.Matrix{
-		Rows: size,
-		Cols: size,
-		Data: make([]float64, size*size),
-	}
-	for i := range res.Data {
-		res.Data[i] = rand.Float64()
-	}
-	return res
 }

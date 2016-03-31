@@ -2,6 +2,7 @@ package qrdecomp
 
 import (
 	"math"
+	"math/rand"
 	"testing"
 
 	"github.com/unixpickle/num-analysis/kahan"
@@ -81,4 +82,16 @@ func matrixDifference(m1, m2 *linalg.Matrix) float64 {
 		res.Add(math.Abs(x - m2.Data[i]))
 	}
 	return res.Sum()
+}
+
+func randomMatrix(size int) *linalg.Matrix {
+	res := &linalg.Matrix{
+		Rows: size,
+		Cols: size,
+		Data: make([]float64, size*size),
+	}
+	for i := range res.Data {
+		res.Data[i] = rand.Float64()
+	}
+	return res
 }
