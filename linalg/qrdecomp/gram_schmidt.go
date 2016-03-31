@@ -9,8 +9,12 @@ import (
 
 // GramSchmidt decomposes an MxN matrix m into a
 // product q*r where q is an MxN matrix with
-// orthonormal columns and Q is an NxN upper-triangular
-// matrix.
+// orthonormal columns and r is an NxN
+// upper-triangular matrix.
+//
+// This only works when the columns of m are
+// independent, meaning that m cannot be
+// underdetermined.
 func GramSchmidt(m *linalg.Matrix) (q, r *linalg.Matrix) {
 	q = m.Copy()
 	r = linalg.NewMatrix(m.Cols, m.Cols)

@@ -8,9 +8,9 @@ import (
 )
 
 // Householder decomposes an MxN matrix m into a
-// product q*r where q is an MxN matrix with
-// orthonormal columns and Q is an NxN
-// upper-triangular matrix.
+// product q*r where q is an MxT matrix with
+// orthonormal columns and r is a TxN
+// upper-triangular matrix where T=min(M, N).
 func Householder(m *linalg.Matrix) (q, r *linalg.Matrix) {
 	var qRef *ReflectionChain
 	qRef, r = HouseholderReflections(m)
