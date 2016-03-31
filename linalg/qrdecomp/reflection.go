@@ -40,7 +40,21 @@ func (r *Reflection) Apply(v linalg.Vector) linalg.Vector {
 	copy(res, v[:ignoreCount])
 	for i, x := range r.V {
 		resIdx := i + ignoreCount
-		res[resIdx] = -v[resIdx] + 2*x*dot
+		res[resIdx] = v[resIdx] - 2*x*dot
 	}
 	return res
+}
+
+// applyColumn applies the Reflection to a column of
+// a matrix in place.
+func (r *Reflection) applyColumn(m *linalg.Matrix, col int) {
+	// TODO: perhaps make this more efficient.
+	v := make(linalg.Vector, m.Rows)
+	for i := range v {
+		v[i] = m.Get(i, col)
+	}
+	v = r.Apply(v)
+	for i, x := range v {
+		m.Set(i, col, x)
+	}
 }

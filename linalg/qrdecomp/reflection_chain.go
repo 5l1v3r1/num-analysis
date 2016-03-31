@@ -3,7 +3,7 @@ package qrdecomp
 import "github.com/unixpickle/num-analysis/linalg"
 
 // A ReflectionChain represents a series of reflections
-// which have increasing dimensionalities, starting at 2.
+// which have increasing dimensionalities.
 //
 // In other words, a ReflectionChain represents a
 // product of householder matrices.
@@ -26,7 +26,7 @@ func (r *ReflectionChain) Apply(v linalg.Vector) linalg.Vector {
 // which can also be thought of as the size of the matrix
 // represented by r.
 func (r *ReflectionChain) Dim() int {
-	return len(r.Reflections) + 1
+	return len(r.Reflections[len(r.Reflections)-1].V)
 }
 
 // Matrix generates a matrix which represents the linear
@@ -54,7 +54,7 @@ func (r *ReflectionChain) Matrix(cols int) *linalg.Matrix {
 		v := make(linalg.Vector, dim)
 		v[i] = 1
 		for k := skipReflections; k < len(r.Reflections); k++ {
-			v = r.Reflections[i].Apply(v)
+			v = r.Reflections[k].Apply(v)
 		}
 		for k, x := range v {
 			res.Set(k, i, x)
