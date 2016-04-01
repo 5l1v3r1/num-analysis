@@ -67,6 +67,27 @@ func (l *LU) Solve(v linalg.Vector) linalg.Vector {
 	return l.OutPerm.Apply(sol2)
 }
 
+// PivotScale returns the ratio between the smallest
+// pivot and the largest pivot.
+// If the original matrix was singular, then this will
+// be close to 0 (or precisely 0).
+func (l *LU) PivotScale() float64 {
+	var max, min float64
+	for i := 0; i < l.LU.Rows; i++ {
+		v := math.Abs(l.LU.Get(i, i))
+		if v == 0 || math.IsNaN(v) {
+			return 0
+		}
+		max = math.Max(max, v)
+		if i == 0 {
+			min = v
+		} else {
+			min = math.Min(min, v)
+		}
+	}
+	return min / max
+}
+
 func (l *LU) bestPivot(stepsDone int) (row, col int) {
 	var biggestValue float64
 	row = stepsDone
