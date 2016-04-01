@@ -1,6 +1,13 @@
 package linalg
 
-import "github.com/unixpickle/num-analysis/kahan"
+import (
+	"bytes"
+	"strconv"
+
+	"github.com/unixpickle/num-analysis/kahan"
+)
+
+const outputPrecision = 10
 
 // A Matrix is an MxN matrix with real entries.
 type Matrix struct {
@@ -122,4 +129,27 @@ func (m *Matrix) Transpose() *Matrix {
 		}
 	}
 	return res
+}
+
+// String returns a human-readable, row-by-row string
+// representation of this matrix.
+// Each row in m is separated by semicolons in m's
+// string representation.
+func (m *Matrix) String() string {
+	var res bytes.Buffer
+	res.WriteRune('[')
+	for row := 0; row < m.Rows; row++ {
+		if row != 0 {
+			res.WriteString("; ")
+		}
+		for col := 0; col < m.Cols; col++ {
+			if col != 0 {
+				res.WriteRune(' ')
+			}
+			val := m.Get(row, col)
+			res.WriteString(strconv.FormatFloat(val, 'g', outputPrecision, 64))
+		}
+	}
+	res.WriteRune(']')
+	return res.String()
 }
