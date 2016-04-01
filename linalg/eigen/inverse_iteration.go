@@ -64,33 +64,49 @@ func (i *inverseIterator) findNextVector() error {
 }
 
 func (i *inverseIterator) inverseIterate() (float64, linalg.Vector) {
-	// Once the pivots differ by sqrt(epsilon), we may lose
-	// half of our double's precision when computing A^-1*x.
-	// This seems like a logical place to stop trying to
-	// find a nearer approximation.
-	pivotThreshold := math.Sqrt(math.Nextafter(1, 2) - 1)
+	epsilon := math.Nextafter(1, 2) - 1
 
 	vec := i.randomStart()
 	i.deleteProjections(vec)
 	val := i.scaleFactor(vec)
 
+	var lastError float64
+	lastVec := vec
+	lastVal := val
+
 	for i.remainingIterations > 0 {
 		i.remainingIterations--
 		mat := i.shiftedMatrix(val)
 		lu := ludecomp.Decompose(mat)
-		if lu.PivotScale() < pivotThreshold {
+		if lu.PivotScale() < epsilon {
 			return val, vec
 		}
 		vec = lu.Solve(vec)
 		i.deleteProjections(vec)
 		normalizeMaxElement(vec)
 		val = i.scaleFactor(vec)
+
+		e := i.backError(val, vec)
+		if e == 0 {
+			return val, vec
+		} else if lastError == 0 {
+			lastError = e
+		} else if e >= lastError {
+			return lastVal, lastVec
+		} else {
+			lastError = e
+			lastVal = val
+			lastVec = vec
+		}
 	}
+
 	return 0, nil
 }
 
 func (i *inverseIterator) powerIterate(val float64, vec linalg.Vector) (float64, linalg.Vector) {
 	var lastError float64
+	lastVec := vec
+	lastVal := val
 
 	for i.remainingIterations > 0 {
 		i.remainingIterations--
@@ -98,16 +114,18 @@ func (i *inverseIterator) powerIterate(val float64, vec linalg.Vector) (float64,
 		normalizeMaxElement(vec)
 		i.deleteProjections(vec)
 		val = i.scaleFactor(vec)
-		backError := i.backError(val, vec)
-		if backError == 0 {
+
+		e := i.backError(val, vec)
+		if e == 0 {
 			return val, vec
 		} else if lastError == 0 {
-			lastError = backError
+			lastError = e
+		} else if e >= lastError {
+			return lastVal, lastVec
 		} else {
-			if backError >= lastError {
-				return val, vec
-			}
-			lastError = backError
+			lastError = e
+			lastVec = vec
+			lastVal = val
 		}
 	}
 
@@ -149,9 +167,9 @@ func (i *inverseIterator) backError(val float64, vec linalg.Vector) float64 {
 	errorSum := kahan.NewSummer64()
 	for i, x := range vec {
 		productVal := multiplied.Get(i, 0)
-		errorSum.Add(math.Abs(productVal - val*x))
+		errorSum.Add(math.Pow(productVal-val*x, 2))
 	}
-	return errorSum.Sum()
+	return math.Sqrt(errorSum.Sum())
 }
 
 // normalizeMaxElement normalizes the given vector using
