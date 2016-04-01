@@ -40,6 +40,14 @@ func NewMatrixIdentity(size int) *Matrix {
 	return res
 }
 
+// NewMatrixColumn creates a column matrix using a
+// vector's values.
+func NewMatrixColumn(v Vector) *Matrix {
+	res := NewMatrix(len(v), 1)
+	copy(res.Data, v)
+	return res
+}
+
 // Get returns the element at the i-th row and
 // the j-th column, where i and j start at 0.
 func (m *Matrix) Get(i, j int) float64 {
@@ -127,6 +135,15 @@ func (m *Matrix) Transpose() *Matrix {
 		for j := 0; j < m.Cols; j++ {
 			res.Set(j, i, m.Get(i, j))
 		}
+	}
+	return res
+}
+
+// Col gets the column vector at the given column index.
+func (m *Matrix) Col(col int) Vector {
+	res := make(Vector, m.Rows)
+	for i := range res {
+		res[i] = m.Get(i, col)
 	}
 	return res
 }
