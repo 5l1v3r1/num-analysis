@@ -19,7 +19,7 @@ type convergeTracker struct {
 func newConvergeTracker(m *linalg.Matrix) *convergeTracker {
 	return &convergeTracker{
 		first:            true,
-		remainingChanges: m.Rows + 1,
+		remainingChanges: m.Rows*2 + 1,
 	}
 }
 
