@@ -42,4 +42,8 @@ ActualLoop:
 		}
 		t.Error("incorrect or duplicated eigenvalue:", v, "expected one of", expectedRemaining)
 	}
+
+	for _, x := range expectedRemaining {
+		t.Error("missing eigenvalue:", x)
+	}
 }

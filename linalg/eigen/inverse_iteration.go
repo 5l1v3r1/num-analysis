@@ -70,9 +70,8 @@ func (i *inverseIterator) inverseIterate() (float64, linalg.Vector) {
 	i.deleteProjections(vec)
 	val := i.scaleFactor(vec)
 
-	var lastError float64
-	lastVec := vec
-	lastVal := val
+	tracker := newConvergeTracker(i.matrix)
+	tracker.Step(i.backError(val, vec), val, vec)
 
 	for i.remainingIterations > 0 {
 		i.remainingIterations--
@@ -86,17 +85,9 @@ func (i *inverseIterator) inverseIterate() (float64, linalg.Vector) {
 		normalizeMaxElement(vec)
 		val = i.scaleFactor(vec)
 
-		e := i.backError(val, vec)
-		if e == 0 {
-			return val, vec
-		} else if lastError == 0 {
-			lastError = e
-		} else if e >= lastError {
-			return lastVal, lastVec
-		} else {
-			lastError = e
-			lastVal = val
-			lastVec = vec
+		tracker.Step(i.backError(val, vec), val, vec)
+		if tracker.Converging() {
+			return tracker.Best()
 		}
 	}
 
@@ -104,9 +95,8 @@ func (i *inverseIterator) inverseIterate() (float64, linalg.Vector) {
 }
 
 func (i *inverseIterator) powerIterate(val float64, vec linalg.Vector) (float64, linalg.Vector) {
-	var lastError float64
-	lastVec := vec
-	lastVal := val
+	tracker := newConvergeTracker(i.matrix)
+	tracker.Step(i.backError(val, vec), val, vec)
 
 	for i.remainingIterations > 0 {
 		i.remainingIterations--
@@ -115,17 +105,9 @@ func (i *inverseIterator) powerIterate(val float64, vec linalg.Vector) (float64,
 		i.deleteProjections(vec)
 		val = i.scaleFactor(vec)
 
-		e := i.backError(val, vec)
-		if e == 0 {
-			return val, vec
-		} else if lastError == 0 {
-			lastError = e
-		} else if e >= lastError {
-			return lastVal, lastVec
-		} else {
-			lastError = e
-			lastVec = vec
-			lastVal = val
+		tracker.Step(i.backError(val, vec), val, vec)
+		if tracker.Converging() {
+			return tracker.Best()
 		}
 	}
 
