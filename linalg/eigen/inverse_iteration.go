@@ -97,6 +97,7 @@ func (i *inverseIterator) inverseIterate() (float64, linalg.Vector) {
 			return val, vec
 		}
 		vec = lu.Solve(vec)
+		normalizeMaxElement(vec)
 		i.deleteProjections(vec)
 		normalizeMaxElement(vec)
 		val = i.scaleFactor(vec)
@@ -119,6 +120,7 @@ func (i *inverseIterator) powerIterate(val float64, vec linalg.Vector) (float64,
 		vec = i.matrix.Mul(linalg.NewMatrixColumn(vec)).Col(0)
 		normalizeMaxElement(vec)
 		i.deleteProjections(vec)
+		normalizeMaxElement(vec)
 		val = i.scaleFactor(vec)
 
 		criteria.Step(i.backError(val, vec), val, vec)

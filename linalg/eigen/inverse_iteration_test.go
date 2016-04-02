@@ -1,7 +1,9 @@
 package eigen
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/unixpickle/num-analysis/linalg"
 )
@@ -39,11 +41,13 @@ var symMat10x10 = &linalg.Matrix{
 }
 
 func inverseIterationEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
+	rand.Seed(time.Now().UnixNano())
 	a, b, _ := InverseIteration(m, 10000)
 	return a, b
 }
 
 func inverseIterationPrecEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
+	rand.Seed(time.Now().UnixNano())
 	a, b, _ := InverseIterationPrec(m, 10000, 1e-6)
 	return a, b
 }
