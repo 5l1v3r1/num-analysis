@@ -134,3 +134,22 @@ func BenchmarkInverseIteration10x10(b *testing.B) {
 		inverseIterationEigenSolver(symMat10x10)
 	}
 }
+
+func BenchmarkInverseIteration50x50(b *testing.B) {
+	mat := randomSymMatrix(50)
+	for i := 0; i < b.N; i++ {
+		inverseIterationEigenSolver(mat)
+	}
+}
+
+func randomSymMatrix(size int) *linalg.Matrix {
+	res := linalg.NewMatrix(size, size)
+	for i := 0; i < size; i++ {
+		for j := 0; j <= i; j++ {
+			val := rand.Float64()
+			res.Set(i, j, val)
+			res.Set(j, i, val)
+		}
+	}
+	return res
+}
