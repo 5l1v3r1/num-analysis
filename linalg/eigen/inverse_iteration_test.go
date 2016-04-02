@@ -43,6 +43,11 @@ func inverseIterationEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) 
 	return a, b
 }
 
+func inverseIterationPrecEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
+	a, b, _ := InverseIterationPrec(m, 10000, 1e-6)
+	return a, b
+}
+
 func TestInverseIterationBasic(t *testing.T) {
 	mat := &linalg.Matrix{
 		Rows: 3,
@@ -54,6 +59,8 @@ func TestInverseIterationBasic(t *testing.T) {
 		},
 	}
 	testEigenSolver(t, inverseIterationEigenSolver, mat, []float64{4.81397359013199e-02,
+		2.99176945337813e+00, 2.49960090810721e+02})
+	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, []float64{4.81397359013199e-02,
 		2.99176945337813e+00, 2.49960090810721e+02})
 }
 

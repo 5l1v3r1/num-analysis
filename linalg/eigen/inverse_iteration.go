@@ -21,6 +21,17 @@ var ErrMaxSteps = errors.New("maximum steps exceeded")
 // along with the eigenvalues and eigenvectors which were
 // already found.
 func InverseIteration(m *linalg.Matrix, maxIters int) ([]float64, []linalg.Vector, error) {
+	return InverseIterationPrec(m, maxIters, 0)
+}
+
+// InverseIterationPrec is like InverseIteration, but
+// it stops making better approximations of each
+// eigenvalue after a certain backwards error is
+// achieved, where backwards error is defined as
+// norm(Av-xv) where v is the approximate eigenvector
+// and x is the approximate eigenvalue.
+func InverseIterationPrec(m *linalg.Matrix, maxIters int,
+	prec float64) ([]float64, []linalg.Vector, error) {
 	if !m.Square() {
 		panic("input matrix must be square")
 	}
@@ -29,6 +40,7 @@ func InverseIteration(m *linalg.Matrix, maxIters int) ([]float64, []linalg.Vecto
 		remainingIterations: maxIters,
 		eigenVectors:        make([]linalg.Vector, 0, m.Rows),
 		eigenValues:         make([]float64, 0, m.Rows),
+		precThreshold:       prec,
 	}
 
 	var err error
@@ -46,6 +58,10 @@ type inverseIterator struct {
 	remainingIterations int
 	eigenVectors        []linalg.Vector
 	eigenValues         []float64
+
+	// precThreshold is non-zero if backErrorCriteria should
+	// be used instead of oscillationCriteria.
+	precThreshold float64
 }
 
 func (i *inverseIterator) findNextVector() error {
@@ -70,8 +86,8 @@ func (i *inverseIterator) inverseIterate() (float64, linalg.Vector) {
 	i.deleteProjections(vec)
 	val := i.scaleFactor(vec)
 
-	tracker := newConvergeTracker(i.matrix)
-	tracker.Step(i.backError(val, vec), val, vec)
+	criteria := i.convergenceCriteria()
+	criteria.Step(i.backError(val, vec), val, vec)
 
 	for i.remainingIterations > 0 {
 		i.remainingIterations--
@@ -85,9 +101,9 @@ func (i *inverseIterator) inverseIterate() (float64, linalg.Vector) {
 		normalizeMaxElement(vec)
 		val = i.scaleFactor(vec)
 
-		tracker.Step(i.backError(val, vec), val, vec)
-		if tracker.Converging() {
-			return tracker.Best()
+		criteria.Step(i.backError(val, vec), val, vec)
+		if criteria.Converging() {
+			return criteria.Best()
 		}
 	}
 
@@ -95,8 +111,8 @@ func (i *inverseIterator) inverseIterate() (float64, linalg.Vector) {
 }
 
 func (i *inverseIterator) powerIterate(val float64, vec linalg.Vector) (float64, linalg.Vector) {
-	tracker := newConvergeTracker(i.matrix)
-	tracker.Step(i.backError(val, vec), val, vec)
+	criteria := i.convergenceCriteria()
+	criteria.Step(i.backError(val, vec), val, vec)
 
 	for i.remainingIterations > 0 {
 		i.remainingIterations--
@@ -105,9 +121,9 @@ func (i *inverseIterator) powerIterate(val float64, vec linalg.Vector) (float64,
 		i.deleteProjections(vec)
 		val = i.scaleFactor(vec)
 
-		tracker.Step(i.backError(val, vec), val, vec)
-		if tracker.Converging() {
-			return tracker.Best()
+		criteria.Step(i.backError(val, vec), val, vec)
+		if criteria.Converging() {
+			return criteria.Best()
 		}
 	}
 
@@ -152,6 +168,14 @@ func (i *inverseIterator) backError(val float64, vec linalg.Vector) float64 {
 		errorSum.Add(math.Pow(productVal-val*x, 2))
 	}
 	return math.Sqrt(errorSum.Sum())
+}
+
+func (i *inverseIterator) convergenceCriteria() convergenceCriteria {
+	if i.precThreshold != 0 {
+		return newBackErrorCriteria(i.precThreshold)
+	} else {
+		return newOscillationCriteria(i.matrix)
+	}
 }
 
 // normalizeMaxElement normalizes the given vector using
