@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math"
 	"math/rand"
+	"time"
 
 	"github.com/unixpickle/num-analysis/kahan"
 	"github.com/unixpickle/num-analysis/linalg"
@@ -53,6 +54,31 @@ func InverseIterationPrec(m *linalg.Matrix, maxIters int,
 	return iterator.eigenValues, iterator.eigenVectors, err
 }
 
+// InverseIterationTime is like InverseIteration, but
+// it uses the given timeout to determine how closely
+// to approximate the eigenvalues and eigenvectors.
+// The more time this routine is given, the more
+// accurate the resulting eigenvalues and eigenvectors
+// are likely to be.
+func InverseIterationTime(m *linalg.Matrix, t time.Duration) ([]float64, []linalg.Vector) {
+	if !m.Square() {
+		panic("input matrix must be square")
+	}
+	iterator := inverseIterator{
+		matrix:        m,
+		eigenVectors:  make([]linalg.Vector, 0, m.Rows),
+		eigenValues:   make([]float64, 0, m.Rows),
+		useTime:       true,
+		iterationTime: t / time.Duration(m.Rows*2),
+	}
+
+	for i := 0; i < m.Rows; i++ {
+		iterator.findNextVector()
+	}
+
+	return iterator.eigenValues, iterator.eigenVectors
+}
+
 type inverseIterator struct {
 	matrix              *linalg.Matrix
 	remainingIterations int
@@ -62,6 +88,9 @@ type inverseIterator struct {
 	// precThreshold is non-zero if backErrorCriteria should
 	// be used instead of oscillationCriteria.
 	precThreshold float64
+
+	useTime       bool
+	iterationTime time.Duration
 }
 
 func (i *inverseIterator) findNextVector() error {
@@ -89,7 +118,7 @@ func (i *inverseIterator) inverseIterate() (float64, linalg.Vector) {
 	criteria := i.convergenceCriteria()
 	criteria.Step(i.backError(val, vec), val, vec)
 
-	for i.remainingIterations > 0 {
+	for i.remainingIterations > 0 || i.useTime {
 		i.remainingIterations--
 		mat := i.shiftedMatrix(val)
 		lu := ludecomp.Decompose(mat)
@@ -115,7 +144,7 @@ func (i *inverseIterator) powerIterate(val float64, vec linalg.Vector) (float64,
 	criteria := i.convergenceCriteria()
 	criteria.Step(i.backError(val, vec), val, vec)
 
-	for i.remainingIterations > 0 {
+	for i.remainingIterations > 0 || i.useTime {
 		i.remainingIterations--
 		vec = i.matrix.Mul(linalg.NewMatrixColumn(vec)).Col(0)
 		normalizeMaxElement(vec)
@@ -175,6 +204,8 @@ func (i *inverseIterator) backError(val float64, vec linalg.Vector) float64 {
 func (i *inverseIterator) convergenceCriteria() convergenceCriteria {
 	if i.precThreshold != 0 {
 		return newBackErrorCriteria(i.precThreshold)
+	} else if i.useTime {
+		return newTimeCriteria(i.iterationTime)
 	} else {
 		return newOscillationCriteria(i.matrix)
 	}

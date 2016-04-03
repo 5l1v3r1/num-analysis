@@ -1,6 +1,10 @@
 package eigen
 
-import "github.com/unixpickle/num-analysis/linalg"
+import (
+	"time"
+
+	"github.com/unixpickle/num-analysis/linalg"
+)
 
 type convergenceCriteria interface {
 	Step(err float64, val float64, vec linalg.Vector)
@@ -98,4 +102,33 @@ func (c *oscillationCriteria) Converging() bool {
 
 func (c *oscillationCriteria) Best() (float64, linalg.Vector) {
 	return c.bestVal, c.bestVec
+}
+
+// timeCriteria is a convergenceCriteria that
+// claims the approximation is converging
+// when a timeout is elapsed.
+type timeCriteria struct {
+	*backErrorCriteria
+	timeout <-chan struct{}
+}
+
+func newTimeCriteria(t time.Duration) *timeCriteria {
+	ch := make(chan struct{}, 0)
+	go func() {
+		time.Sleep(t)
+		close(ch)
+	}()
+	return &timeCriteria{
+		backErrorCriteria: newBackErrorCriteria(0),
+		timeout:           ch,
+	}
+}
+
+func (t *timeCriteria) Converging() bool {
+	select {
+	case <-t.timeout:
+		return true
+	default:
+		return false
+	}
 }

@@ -52,6 +52,11 @@ func inverseIterationPrecEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vect
 	return a, b
 }
 
+func inverseIterationTimeEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
+	rand.Seed(time.Now().UnixNano())
+	return InverseIterationTime(m, time.Millisecond*30)
+}
+
 func TestInverseIterationBasic(t *testing.T) {
 	mat := &linalg.Matrix{
 		Rows: 3,
@@ -62,10 +67,10 @@ func TestInverseIterationBasic(t *testing.T) {
 			76, 92, 94,
 		},
 	}
-	testEigenSolver(t, inverseIterationEigenSolver, mat, []float64{4.81397359013199e-02,
-		2.99176945337813e+00, 2.49960090810721e+02})
-	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, []float64{4.81397359013199e-02,
-		2.99176945337813e+00, 2.49960090810721e+02})
+	eigs := []float64{4.81397359013199e-02, 2.99176945337813e+00, 2.49960090810721e+02}
+	testEigenSolver(t, inverseIterationEigenSolver, mat, eigs)
+	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, eigs)
+	testEigenSolver(t, inverseIterationTimeEigenSolver, mat, eigs)
 }
 
 func TestInverseIterationNullspace(t *testing.T) {
@@ -78,19 +83,20 @@ func TestInverseIterationNullspace(t *testing.T) {
 			90, 108, 126,
 		},
 	}
-	testEigenSolver(t, inverseIterationEigenSolver, mat, []float64{0,
-		1.14141341962985e+00, 2.83858586580370e+02})
-	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, []float64{0,
-		1.14141341962985e+00, 2.83858586580370e+02})
+	eigs := []float64{0, 1.14141341962985e+00, 2.83858586580370e+02}
+	testEigenSolver(t, inverseIterationEigenSolver, mat, eigs)
+	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, eigs)
+	testEigenSolver(t, inverseIterationTimeEigenSolver, mat, eigs)
 }
 
 func TestInverseIteration10x10(t *testing.T) {
-	solutions := []float64{-3.53320764624989e+00,
+	eigs := []float64{-3.53320764624989e+00,
 		1.94571466978943e-02, 3.94135968791024e-02, 2.79652524908013e-01,
 		3.83072877722642e-01, 6.66544542615382e-01, 1.16866047971769e+00,
 		1.83799425365499e+00, 2.46391983763316e+00, 2.39701303840477e+01}
-	testEigenSolver(t, inverseIterationEigenSolver, symMat10x10, solutions)
-	testEigenSolver(t, inverseIterationPrecEigenSolver, symMat10x10, solutions)
+	testEigenSolver(t, inverseIterationEigenSolver, symMat10x10, eigs)
+	testEigenSolver(t, inverseIterationPrecEigenSolver, symMat10x10, eigs)
+	testEigenSolver(t, inverseIterationTimeEigenSolver, symMat10x10, eigs)
 }
 
 func TestInverseIterationRepeatedEig(t *testing.T) {
@@ -107,8 +113,10 @@ func TestInverseIterationRepeatedEig(t *testing.T) {
 			4.97327779617766e-01,
 		},
 	}
-	testEigenSolver(t, inverseIterationEigenSolver, mat, []float64{1, 1, 3, -2})
-	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, []float64{1, 1, 3, -2})
+	eigs := []float64{1, 1, 3, -2}
+	testEigenSolver(t, inverseIterationEigenSolver, mat, eigs)
+	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, eigs)
+	testEigenSolver(t, inverseIterationTimeEigenSolver, mat, eigs)
 }
 
 func TestInverseIterationNearEigenvalues(t *testing.T) {
@@ -125,8 +133,10 @@ func TestInverseIterationNearEigenvalues(t *testing.T) {
 			4.95847848237095e-01,
 		},
 	}
-	testEigenSolver(t, inverseIterationEigenSolver, mat, []float64{1, 0.99, 3, -2})
-	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, []float64{1, 0.99, 3, -2})
+	eigs := []float64{1, 0.99, 3, -2}
+	testEigenSolver(t, inverseIterationEigenSolver, mat, eigs)
+	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, eigs)
+	testEigenSolver(t, inverseIterationTimeEigenSolver, mat, eigs)
 }
 
 func BenchmarkInverseIteration10x10(b *testing.B) {
