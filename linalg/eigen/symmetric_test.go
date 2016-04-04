@@ -40,21 +40,20 @@ var symMat10x10 = &linalg.Matrix{
 	},
 }
 
-func inverseIterationEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
+func symmetricEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
 	rand.Seed(time.Now().UnixNano())
-	a, b, _ := InverseIteration(m, 1000000)
+	return Symmetric(m)
+}
+
+func symmetricPrecEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
+	rand.Seed(time.Now().UnixNano())
+	a, b, _ := SymmetricPrec(m, time.Second, 1e-6)
 	return a, b
 }
 
-func inverseIterationPrecEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
+func symmetricTimeEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
 	rand.Seed(time.Now().UnixNano())
-	a, b, _ := InverseIterationPrec(m, 10000, 1e-6)
-	return a, b
-}
-
-func inverseIterationTimeEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
-	rand.Seed(time.Now().UnixNano())
-	return InverseIterationTime(m, time.Millisecond*30)
+	return SymmetricFixedTime(m, time.Millisecond*30)
 }
 
 func TestInverseIterationBasic(t *testing.T) {
@@ -68,9 +67,9 @@ func TestInverseIterationBasic(t *testing.T) {
 		},
 	}
 	eigs := []float64{4.81397359013199e-02, 2.99176945337813e+00, 2.49960090810721e+02}
-	testEigenSolver(t, inverseIterationEigenSolver, mat, eigs)
-	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, eigs)
-	testEigenSolver(t, inverseIterationTimeEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricPrecEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricTimeEigenSolver, mat, eigs)
 }
 
 func TestInverseIterationNullspace(t *testing.T) {
@@ -84,9 +83,9 @@ func TestInverseIterationNullspace(t *testing.T) {
 		},
 	}
 	eigs := []float64{0, 1.14141341962985e+00, 2.83858586580370e+02}
-	testEigenSolver(t, inverseIterationEigenSolver, mat, eigs)
-	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, eigs)
-	testEigenSolver(t, inverseIterationTimeEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricPrecEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricTimeEigenSolver, mat, eigs)
 }
 
 func TestInverseIteration10x10(t *testing.T) {
@@ -94,9 +93,9 @@ func TestInverseIteration10x10(t *testing.T) {
 		1.94571466978943e-02, 3.94135968791024e-02, 2.79652524908013e-01,
 		3.83072877722642e-01, 6.66544542615382e-01, 1.16866047971769e+00,
 		1.83799425365499e+00, 2.46391983763316e+00, 2.39701303840477e+01}
-	testEigenSolver(t, inverseIterationEigenSolver, symMat10x10, eigs)
-	testEigenSolver(t, inverseIterationPrecEigenSolver, symMat10x10, eigs)
-	testEigenSolver(t, inverseIterationTimeEigenSolver, symMat10x10, eigs)
+	testEigenSolver(t, symmetricEigenSolver, symMat10x10, eigs)
+	testEigenSolver(t, symmetricPrecEigenSolver, symMat10x10, eigs)
+	testEigenSolver(t, symmetricTimeEigenSolver, symMat10x10, eigs)
 }
 
 func TestInverseIterationRepeatedEig(t *testing.T) {
@@ -114,9 +113,9 @@ func TestInverseIterationRepeatedEig(t *testing.T) {
 		},
 	}
 	eigs := []float64{1, 1, 3, -2}
-	testEigenSolver(t, inverseIterationEigenSolver, mat, eigs)
-	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, eigs)
-	testEigenSolver(t, inverseIterationTimeEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricPrecEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricTimeEigenSolver, mat, eigs)
 }
 
 func TestInverseIterationNearEigenvalues(t *testing.T) {
@@ -134,21 +133,21 @@ func TestInverseIterationNearEigenvalues(t *testing.T) {
 		},
 	}
 	eigs := []float64{1, 0.99, 3, -2}
-	testEigenSolver(t, inverseIterationEigenSolver, mat, eigs)
-	testEigenSolver(t, inverseIterationPrecEigenSolver, mat, eigs)
-	testEigenSolver(t, inverseIterationTimeEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricPrecEigenSolver, mat, eigs)
+	testEigenSolver(t, symmetricTimeEigenSolver, mat, eigs)
 }
 
 func BenchmarkInverseIteration10x10(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		inverseIterationEigenSolver(symMat10x10)
+		symmetricEigenSolver(symMat10x10)
 	}
 }
 
 func BenchmarkInverseIteration50x50(b *testing.B) {
 	mat := randomSymMatrix(50)
 	for i := 0; i < b.N; i++ {
-		inverseIterationEigenSolver(mat)
+		symmetricEigenSolver(mat)
 	}
 }
 
