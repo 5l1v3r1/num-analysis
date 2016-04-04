@@ -138,6 +138,27 @@ func TestSymmetricNearEigenvalues(t *testing.T) {
 	testEigenSolver(t, symmetricTimeEigenSolver, mat, eigs)
 }
 
+func TestSymmetricAsyncCancel(t *testing.T) {
+	mat := randomSymMatrix(100)
+	res := SymmetricAsync(mat)
+	go func() {
+		time.Sleep(time.Millisecond * 30)
+		close(res.Cancel)
+	}()
+	timeout := time.After(time.Second)
+	for {
+		select {
+		case _, ok := <-res.Values:
+			if !ok {
+				return
+			}
+		case <-timeout:
+			t.Error("solver was not cancelled")
+			return
+		}
+	}
+}
+
 func BenchmarkSymmetric10x10(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		symmetricEigenSolver(symMat10x10)
