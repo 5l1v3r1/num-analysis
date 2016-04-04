@@ -56,7 +56,7 @@ func symmetricTimeEigenSolver(m *linalg.Matrix) ([]float64, []linalg.Vector) {
 	return SymmetricFixedTime(m, time.Millisecond*30)
 }
 
-func TestInverseIterationBasic(t *testing.T) {
+func TestSymmetricBasic(t *testing.T) {
 	mat := &linalg.Matrix{
 		Rows: 3,
 		Cols: 3,
@@ -72,7 +72,7 @@ func TestInverseIterationBasic(t *testing.T) {
 	testEigenSolver(t, symmetricTimeEigenSolver, mat, eigs)
 }
 
-func TestInverseIterationNullspace(t *testing.T) {
+func TestSymmetricNullspace(t *testing.T) {
 	mat := &linalg.Matrix{
 		Rows: 3,
 		Cols: 3,
@@ -88,7 +88,7 @@ func TestInverseIterationNullspace(t *testing.T) {
 	testEigenSolver(t, symmetricTimeEigenSolver, mat, eigs)
 }
 
-func TestInverseIteration10x10(t *testing.T) {
+func TestSymmetric10x10(t *testing.T) {
 	eigs := []float64{-3.53320764624989e+00,
 		1.94571466978943e-02, 3.94135968791024e-02, 2.79652524908013e-01,
 		3.83072877722642e-01, 6.66544542615382e-01, 1.16866047971769e+00,
@@ -98,7 +98,7 @@ func TestInverseIteration10x10(t *testing.T) {
 	testEigenSolver(t, symmetricTimeEigenSolver, symMat10x10, eigs)
 }
 
-func TestInverseIterationRepeatedEig(t *testing.T) {
+func TestSymmetricRepeatedEig(t *testing.T) {
 	mat := &linalg.Matrix{
 		Rows: 4,
 		Cols: 4,
@@ -118,7 +118,7 @@ func TestInverseIterationRepeatedEig(t *testing.T) {
 	testEigenSolver(t, symmetricTimeEigenSolver, mat, eigs)
 }
 
-func TestInverseIterationNearEigenvalues(t *testing.T) {
+func TestSymmetricNearEigenvalues(t *testing.T) {
 	mat := &linalg.Matrix{
 		Rows: 4,
 		Cols: 4,
@@ -138,13 +138,13 @@ func TestInverseIterationNearEigenvalues(t *testing.T) {
 	testEigenSolver(t, symmetricTimeEigenSolver, mat, eigs)
 }
 
-func BenchmarkInverseIteration10x10(b *testing.B) {
+func BenchmarkSymmetric10x10(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		symmetricEigenSolver(symMat10x10)
 	}
 }
 
-func BenchmarkInverseIteration50x50(b *testing.B) {
+func BenchmarkSymmetric50x50(b *testing.B) {
 	mat := randomSymMatrix(50)
 	for i := 0; i < b.N; i++ {
 		symmetricEigenSolver(mat)
