@@ -118,12 +118,18 @@ func (i *inverseIterator) inverseIterate() (float64, linalg.Vector) {
 	criteria := i.convergenceCriteria()
 	criteria.Step(i.backError(val, vec), val, vec)
 
+	cache := newLUCache()
+
 	for i.remainingIterations > 0 || i.useTime {
 		i.remainingIterations--
-		mat := i.shiftedMatrix(val)
-		lu := ludecomp.Decompose(mat)
-		if lu.PivotScale() < epsilon {
-			return val, vec
+		lu := cache.get(val)
+		if lu == nil {
+			mat := i.shiftedMatrix(val)
+			lu = ludecomp.Decompose(mat)
+			cache.set(val, lu)
+			if lu.PivotScale() < epsilon {
+				return val, vec
+			}
 		}
 		vec = lu.Solve(vec)
 		normalizeMaxElement(vec)
