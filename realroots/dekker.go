@@ -75,7 +75,7 @@ func (d *dekker) Root() float64 {
 // Bounded computes whether or not the approximate
 // root is bounded by a certain amount of error.
 func (d *dekker) Bounded(bound float64) bool {
-	if d.counterPointX-d.guessX < bound {
+	if math.Abs(d.counterPointX-d.guessX) < bound {
 		return true
 	}
 	var closeCounter float64
@@ -85,7 +85,7 @@ func (d *dekker) Bounded(bound float64) bool {
 		closeCounter = d.guessX + bound
 	}
 	closeValue := d.function.Eval(closeCounter)
-	return closeValue == 0 || (closeValue < 0) != (d.guessX < 0)
+	return closeValue == 0 || (closeValue < 0) != (d.guessY < 0)
 }
 
 func (d *dekker) secantRoot() (root float64, valid bool) {
