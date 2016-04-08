@@ -1,5 +1,7 @@
 package realroots
 
+import "github.com/unixpickle/num-analysis/kahan"
+
 // A Polynomial represents a polynomial with
 // real coefficients.
 //
@@ -14,13 +16,14 @@ func (p Polynomial) Eval(x float64) float64 {
 		return 0
 	}
 
-	res := p[0]
+	s := kahan.NewSummer64()
+	s.Add(p[0])
 
 	varTerm := x
 	for _, coeff := range p[1:] {
-		res += varTerm * coeff
+		s.Add(varTerm * coeff)
 		varTerm *= x
 	}
 
-	return res
+	return s.Sum()
 }
