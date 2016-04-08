@@ -18,9 +18,9 @@ type badDekker struct {
 func (b *badDekker) Eval(x float64) float64 {
 	b.callCount++
 	if x <= 60 {
-		return math.Pow(2, -x)
+		return math.Pow(5, -x)
 	} else {
-		return math.Pow(2, -60) + -60*(x-60)
+		return math.Pow(5, -60) + -60*(x-60)
 	}
 }
 
@@ -46,7 +46,7 @@ func TestDekker(t *testing.T) {
 			break
 		}
 	}
-	if bad.callCount < 120 {
+	if bad.callCount < 320 {
 		t.Error("unexpected call count", bad.callCount)
 	}
 	if math.Abs(d.Root()-60) > 1e-6 {
