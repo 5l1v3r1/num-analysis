@@ -41,6 +41,7 @@ func newDekker(f Func, i Interval) *dekker {
 	}
 }
 
+// Step performs a step of Dekker's method.
 func (d *dekker) Step() {
 	if d.done {
 		return
@@ -60,12 +61,31 @@ func (d *dekker) Step() {
 	}
 }
 
+// Done returns true if no better approximations
+// are possible.
 func (d *dekker) Done() bool {
 	return d.done
 }
 
+// Root returns the approximate root.
 func (d *dekker) Root() float64 {
 	return d.guessX
+}
+
+// Bounded computes whether or not the approximate
+// root is bounded by a certain amount of error.
+func (d *dekker) Bounded(bound float64) bool {
+	if d.counterPointX-d.guessX < bound {
+		return true
+	}
+	var closeCounter float64
+	if d.counterPointX < d.guessX {
+		closeCounter = d.guessX - bound
+	} else {
+		closeCounter = d.guessX + bound
+	}
+	closeValue := d.function.Eval(closeCounter)
+	return closeValue == 0 || (closeValue < 0) != (d.guessX < 0)
 }
 
 func (d *dekker) secantRoot() (root float64, valid bool) {
@@ -78,6 +98,11 @@ func (d *dekker) secantRoot() (root float64, valid bool) {
 }
 
 func (d *dekker) updateGuess(x float64) {
+	if x == d.guessX && x == d.lastGuessX {
+		d.done = true
+		return
+	}
+
 	d.lastGuessX = d.guessX
 	d.lastGuessY = d.guessY
 

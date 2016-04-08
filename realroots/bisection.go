@@ -28,10 +28,13 @@ func Bisection(f Func, i Interval, steps int) float64 {
 // the size of the narrowed-down interval is
 // less than prec.
 func BisectionPrec(f Func, i Interval, prec float64) float64 {
+	return Bisection(f, i, bisectionSteps(i, prec))
+}
+
+func bisectionSteps(i Interval, prec float64) int {
 	currentSpace := i.End - i.Start
 	ratio := currentSpace / prec
-	stepCount := int(math.Ceil(math.Log2(ratio)))
-	return Bisection(f, i, stepCount)
+	return int(math.Ceil(math.Log2(ratio)))
 }
 
 type bisector struct {
@@ -69,6 +72,7 @@ func newBisector(f Func, i Interval) *bisector {
 	}
 }
 
+// Step performs a step of bisection.
 func (b *bisector) Step() {
 	if b.done {
 		return
@@ -92,13 +96,22 @@ func (b *bisector) Step() {
 	}
 }
 
+// Done returns true if the bisector is at the
+// best possible approximation.
 func (b *bisector) Done() bool {
 	return b.done
 }
 
+// Root returns the approximate root.
 func (b *bisector) Root() float64 {
 	if b.done {
 		return b.interval.Start
 	}
 	return (b.interval.Start + b.interval.End) / 2
+}
+
+// Bounded returns true if the error of the
+// approximate root is no greater than e.
+func (b *bisector) Bounded(e float64) bool {
+	return (b.interval.End-b.interval.Start)/2 <= e
 }
