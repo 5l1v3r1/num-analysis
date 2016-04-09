@@ -69,6 +69,21 @@ func (p Polynomial) Jacobian(vec linalg.Vector) *linalg.Matrix {
 	x := complex(vec[0], vec[1])
 	res := linalg.NewMatrix(2, 2)
 
+	// Our polynomial is p(x), where x = a + ib.
+	// Thus, we can construct g(a,b) = p(a+ib).
+	// We now can compute the partials:
+	// - (dg)/(da) = p'(a+ib)
+	// - (dg)/(db) = i*p'(a+ib)
+
+	// Since p(a+ib) can be split into two real
+	// functions h and k like:
+	// p(a+ib)=h(a,b) + i*k(a,b)
+	// We know that p'(a+ib) = h'(a,b) + i*k'(a,b).
+	// Since the real and complex parts of p(x) and
+	// p'(x) can be split up into functions like
+	// this, we know that it is okay to use real(p')
+	// and imag(p') as partials.
+
 	realDeriv := p.evaluateDerivative(x)
 	res.Set(0, 0, real(realDeriv))
 	res.Set(1, 0, imag(realDeriv))
