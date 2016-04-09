@@ -1,6 +1,11 @@
 package mvroots
 
-import "github.com/unixpickle/num-analysis/kahan"
+import (
+	"math"
+	"math/cmplx"
+
+	"github.com/unixpickle/num-analysis/kahan"
+)
 
 // Polynomial is a ComplexFunc which represents
 // a polynomial.
@@ -31,4 +36,31 @@ func (p Polynomial) Derivative(x complex128) complex128 {
 		xPower *= x
 	}
 	return s.Sum()
+}
+
+// RootBound returns a "bound" for the roots of
+// the polynomial. No roots will have a magnitude
+// greater than the returned bound.
+func (p Polynomial) RootBound() float64 {
+	if len(p) < 2 {
+		return 0
+	}
+
+	leadingMag := cmplx.Abs(p[len(p)-1])
+
+	// This is the Fujiwara bound, which, believe me,
+	// is very very clever.
+	var maxX float64
+	for i, x := range p[:len(p)-1] {
+		rootNum := float64(len(p) - (i + 1))
+		coeffMag := cmplx.Abs(x)
+		quotient := coeffMag / leadingMag
+		if i == 0 {
+			quotient /= 2
+		}
+		x := math.Pow(quotient, 1/rootNum)
+		maxX = math.Max(maxX, x)
+	}
+
+	return 2 * maxX
 }
