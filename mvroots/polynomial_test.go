@@ -29,6 +29,16 @@ func TestPolynomialRootsComplexCoeffs(t *testing.T) {
 	generalPolynomialTest(t, poly, roots, 1e-7)
 }
 
+func TestPolynomialRootsSparse(t *testing.T) {
+	poly := Polynomial{7, 0, 0, -1}
+	roots := []complex128{
+		-0.956465591386194 + 1.656646999972302i,
+		-0.956465591386194 - 1.656646999972302i,
+		1.912931182772389,
+	}
+	generalPolynomialTest(t, poly, roots, 1e-7)
+}
+
 func generalPolynomialTest(t *testing.T, p Polynomial, roots []complex128, prec float64) {
 	actual := p.Roots()
 	expected := map[complex128]bool{}
