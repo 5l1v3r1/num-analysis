@@ -3,9 +3,21 @@ package mvroots
 import (
 	"math"
 	"math/cmplx"
+	"math/rand"
 
 	"github.com/unixpickle/num-analysis/kahan"
+	"github.com/unixpickle/num-analysis/linalg"
 )
+
+// polyRootThreshold is a scaling factor by which a
+// function's value must be shrunken by Newton's
+// method in order to be considered a root.
+// For instance, if f(x0) = 10, then you want
+// f(xn) = polyRootThreshold*10 in order for xn to
+// be considered a root.
+const polyRootThreshold = 1e-11
+
+const polyRootIterationSteps = 40
 
 // Polynomial is a ComplexFunc which represents
 // a polynomial.
@@ -80,4 +92,53 @@ func (p Polynomial) Quotient(b complex128) Polynomial {
 		leadingCoefficient = b*leadingCoefficient + p[i-1]
 	}
 	return res
+}
+
+// OneRoot approximates a single root of this
+// polynomial.
+func (p Polynomial) OneRoot() complex128 {
+	if len(p) <= 1 {
+		return cmplx.NaN()
+	}
+	bound := p.RootBound()
+
+	for {
+		r := rand.Float64()*bound*2 - bound
+		i := rand.Float64()*bound*2 - bound
+
+		startMagnitude := cmplx.Abs(p.Eval(complex(r, i)))
+		if startMagnitude == 0 {
+			return complex(r, i)
+		}
+
+		iterator := NewIterator(ComplexAdapter{p}, linalg.Vector{r, i})
+
+		var smallestVal float64
+		var bestRoot complex128
+
+		for i := 0; i < polyRootIterationSteps; i++ {
+			iterator.Step()
+			guess := iterator.Guess()
+			argument := complex(guess[0], guess[1])
+			funcVal := cmplx.Abs(p.Eval(argument))
+			if i == 0 || funcVal < smallestVal {
+				smallestVal = funcVal
+				bestRoot = argument
+			}
+		}
+
+		if smallestVal < polyRootThreshold*startMagnitude {
+			return bestRoot
+		}
+	}
+}
+
+// Roots returns the complex roots of this
+// polynomial.
+func (p Polynomial) Roots() []complex128 {
+	root := p.OneRoot()
+	if cmplx.IsNaN(root) {
+		return nil
+	}
+	return append(p.Quotient(root).Roots(), root)
 }
