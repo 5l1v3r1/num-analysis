@@ -2,7 +2,6 @@ package realroots
 
 import (
 	"math"
-	"sort"
 
 	"github.com/unixpickle/num-analysis/kahan"
 )
@@ -34,10 +33,11 @@ func (p Polynomial) Eval(x float64) float64 {
 }
 
 // OddRoots approximates the real roots of p
-// that pass through the x-axis without
-// "bouncing off" of it.
-// In other words, it returns the roots of odd
-// multiplicity.
+// that pass through the x-axis.
+// It is not guaranteed to return the even roots
+// of the function, since said roots "bounce off"
+// the axis. However, it may return some even
+// roots if it finds them.
 //
 // The roots are sorted in ascending order.
 func (p Polynomial) OddRoots() []float64 {
@@ -54,12 +54,10 @@ func (p Polynomial) OddRoots() []float64 {
 	criticalPoints := trimmed.Derivative().OddRoots()
 
 	if len(criticalPoints) == 0 {
-		if len(trimmed)%2 == 1 {
+		if trimmed.even() {
 			return nil
 		} else {
-			// TODO: use the end behavior points of the function
-			// to bracket the root, then solve.
-			panic("not yet implemented.")
+			return []float64{trimmed.singleOddRoot()}
 		}
 	}
 
@@ -69,22 +67,34 @@ func (p Polynomial) OddRoots() []float64 {
 	}
 
 	var roots []float64
+
+	if r, ok := trimmed.initialRoot(criticalPoints[0], evaluatedPoints[0]); ok {
+		roots = []float64{r}
+	}
+
 	for i := 0; i < len(criticalPoints)-1; i++ {
 		val1 := evaluatedPoints[i]
+		if val1 == 0 {
+			roots = append(roots, criticalPoints[i])
+			continue
+		}
 		val2 := evaluatedPoints[i+1]
-		if val1 == 0 || val2 == 0 {
+		if val2 == 0 {
 			continue
 		}
 		if (val1 < 0) != (val2 < 0) {
-			roots = append(roots, Root(trimmed, Interval{val1, val2}))
+			p1, p2 := criticalPoints[i], criticalPoints[i+1]
+			roots = append(roots, Root(trimmed, Interval{p1, p2}))
 		}
 	}
 
-	// TODO: look for a root before the first critical point.
-	// TODO: look for a root after the last critical point.
-	panic("not yet implemented.")
+	k := len(criticalPoints) - 1
+	if evaluatedPoints[k] == 0 {
+		roots = append(roots, criticalPoints[k])
+	} else if r, ok := trimmed.finalRoot(criticalPoints[k], evaluatedPoints[k]); ok {
+		roots = append(roots, r)
+	}
 
-	sort.Float64s(roots)
 	return roots
 }
 
@@ -126,4 +136,80 @@ func (p Polynomial) trim() Polynomial {
 		}
 	}
 	return res
+}
+
+// even returns true if this polynomial's
+// highest term is of an even power.
+func (p Polynomial) even() bool {
+	return len(p)%2 == 1
+}
+
+// singleOddRoot returns the root for odd
+// polynomials which have no local maxes
+// or mins.
+func (p Polynomial) singleOddRoot() float64 {
+	zeroVal := p.Eval(0)
+	if zeroVal == 0 {
+		return zeroVal
+	}
+	if zeroVal > 0 {
+		negativePoint := p.endBehaviorLeft(-p.epsilon())
+		return Root(p, Interval{negativePoint, 0})
+	} else {
+		positivePoint := p.endBehaviorRight(p.epsilon())
+		return Root(p, Interval{0, positivePoint})
+	}
+}
+
+// endBehaviorRight returns an x value after
+// a given x at which the function is positive.
+func (p Polynomial) endBehaviorRight(x float64) float64 {
+	epsilon := math.Abs(math.Nextafter(x, x*2) - x)
+	for p.Eval(x+epsilon) <= 0 {
+		epsilon *= 2
+	}
+	return x + epsilon
+}
+
+// endBehaviorLeft returns an x value before
+// a given x value at which the function is
+// negative or positive, depending on the
+// degree of p.
+func (p Polynomial) endBehaviorLeft(x float64) float64 {
+	epsilon := math.Abs(math.Nextafter(x, x*2) - x)
+	if p.even() {
+		for p.Eval(x-epsilon) <= 0 {
+			epsilon *= 2
+		}
+	} else {
+		for p.Eval(x-epsilon) >= 0 {
+			epsilon *= 2
+		}
+	}
+	return x - epsilon
+}
+
+// initialRoot returns the root before any of
+// the critical points, if one exists.
+// The x and y arguments are the coordinates of
+// the leftmost critical point of the function.
+func (p Polynomial) initialRoot(x, y float64) (float64, bool) {
+	if (p.even() && y < 0) || (!p.even() && y > 0) {
+		bracketLeft := p.endBehaviorLeft(x)
+		return Root(p, Interval{bracketLeft, x}), true
+	} else {
+		return 0, false
+	}
+}
+
+// finalRoot returns the root after any of the
+// critical points, if one exists.
+// This is like initialRoot, except for the right
+// of the function instead of the left of it.
+func (p Polynomial) finalRoot(x, y float64) (float64, bool) {
+	if y >= 0 {
+		return 0, false
+	}
+	bracketRight := p.endBehaviorRight(x)
+	return Root(p, Interval{x, bracketRight}), true
 }
