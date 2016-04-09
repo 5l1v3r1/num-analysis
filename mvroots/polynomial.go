@@ -64,3 +64,20 @@ func (p Polynomial) RootBound() float64 {
 
 	return 2 * maxX
 }
+
+// Quotient divides this polynomial by a binomial
+// (x-b) and returns the new polynomial, discarding
+// the remainder.
+// The binomial that this divides by is (x - b).
+func (p Polynomial) Quotient(b complex128) Polynomial {
+	if len(p) <= 1 {
+		return Polynomial{}
+	}
+	leadingCoefficient := p[len(p)-1]
+	res := make(Polynomial, len(p)-1)
+	for i := len(p) - 1; i > 0; i-- {
+		res[i-1] = leadingCoefficient
+		leadingCoefficient = b*leadingCoefficient + p[i-1]
+	}
+	return res
+}
