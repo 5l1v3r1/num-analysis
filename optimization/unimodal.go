@@ -2,10 +2,6 @@ package optimization
 
 import "math"
 
-type UnimodalFunc interface {
-	Eval(x float64) float64
-}
-
 // UnimodalMinPrec finds the minimum of a
 // unimodal function up to a certain error
 // bound, prec.
@@ -72,11 +68,17 @@ func unimodalMinBracket(u UnimodalFunc) (before, after float64) {
 	after = 1
 	for !unimodalIncreasingAfter(u, after) {
 		after *= 2
+		if math.IsInf(after, 0) {
+			panic("function is not unimodal")
+		}
 	}
 
 	before = -1
 	for !unimodalIncreasingAfter(u, before) {
 		before *= 2
+		if math.IsInf(before, 0) {
+			panic("function is not unimodal")
+		}
 	}
 
 	return

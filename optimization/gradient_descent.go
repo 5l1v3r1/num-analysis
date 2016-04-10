@@ -6,22 +6,6 @@ import (
 	"github.com/unixpickle/num-analysis/linalg"
 )
 
-// GradFunc is a multivariable function with a
-// computable gradient.
-type GradFunc interface {
-	// Dim returns the number of input arguments
-	// this function takes.
-	Dim() int
-
-	// Eval evaluates the function for the given
-	// argument vector.
-	Eval(vec linalg.Vector) float64
-
-	// Gradient evaluates the gradient of the
-	// function at a given argument vector.
-	Gradient(vec linalg.Vector) linalg.Vector
-}
-
 // GradientDescentPrec finds the minimum of a
 // quasi-convex multivariable function using
 // gradient descent.
