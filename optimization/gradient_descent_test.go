@@ -1,7 +1,6 @@
 package optimization
 
 import (
-	"math"
 	"testing"
 
 	"github.com/unixpickle/num-analysis/linalg"
@@ -20,10 +19,10 @@ func TestGradientDescentSolvableSystem(t *testing.T) {
 	}
 	product := linalg.Vector{400, 300, 20, -30.5}
 	sys := NewLinSysFunc(matrix, product)
-	actual := GradientDescent(sys, 1e-8)
+	actual := GradientDescent(sys, 1e-12)
 	expected := linalg.Vector{-623, 515.5, 338, -255.5}
 	diff := actual.Copy().Add(expected.Scale(-1))
-	if math.Sqrt(diff.Dot(diff)) > 1e-3 {
+	if diff.Dot(diff) > 1e-10 {
 		t.Error("expected", expected, "but got", actual)
 	}
 }

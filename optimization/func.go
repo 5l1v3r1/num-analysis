@@ -45,7 +45,7 @@ func NewLinSysFunc(a *linalg.Matrix, b linalg.Vector) *LinSysFunc {
 	return &LinSysFunc{
 		matrix:    a,
 		normal:    a.Transpose().Mul(a).Scale(2),
-		constTerm: a.Transpose().Mul(linalg.NewMatrixColumn(b)),
+		constTerm: a.Transpose().Mul(linalg.NewMatrixColumn(b)).Scale(-2),
 		product:   b,
 	}
 }
