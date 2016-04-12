@@ -6,6 +6,7 @@ import (
 	"github.com/unixpickle/num-analysis/kahan"
 	"github.com/unixpickle/num-analysis/linalg"
 	"github.com/unixpickle/num-analysis/linalg/qrdecomp"
+	"github.com/unixpickle/num-analysis/mvroots"
 )
 
 // defaultMinPolyPrecision is the default factor
@@ -49,6 +50,21 @@ func MinPoly(m *linalg.Matrix) []float64 {
 		maxEntry = math.Max(maxEntry, math.Abs(x))
 	}
 	return MinPolyPrec(m, maxEntry*defaultMinPolyPrecision)
+}
+
+// MinEigs computes the roots of the minimal
+// polynomial of a matrix.
+//
+// This is equivalent to finding the eigenvalues
+// of the matrix and removing some (but not all)
+// of the repeated ones.
+func MinEigs(m *linalg.Matrix) []complex128 {
+	poly := MinPoly(m)
+	complexPoly := make(mvroots.Polynomial, len(poly))
+	for i, x := range poly {
+		complexPoly[i] = complex(x, 0)
+	}
+	return complexPoly.Roots()
 }
 
 func isZeroMatrix(m *linalg.Matrix, prec float64) bool {
