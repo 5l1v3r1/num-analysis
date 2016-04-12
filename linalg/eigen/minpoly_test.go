@@ -3,6 +3,7 @@ package eigen
 import (
 	"math"
 	"math/cmplx"
+	"math/rand"
 	"testing"
 
 	"github.com/unixpickle/num-analysis/linalg"
@@ -62,5 +63,25 @@ ActualLoop:
 	}
 	for exp := range expected {
 		t.Error("missing eigenvalue:", exp)
+	}
+}
+
+func BenchmarkMinEigs10x10(b *testing.B) {
+	matrix := linalg.NewMatrix(10, 10)
+	for i := range matrix.Data {
+		matrix.Data[i] = (rand.Float64() * 2) - 1
+	}
+	for i := 0; i < b.N; i++ {
+		MinEigs(matrix)
+	}
+}
+
+func BenchmarkMinEigs50x50(b *testing.B) {
+	matrix := linalg.NewMatrix(50, 50)
+	for i := range matrix.Data {
+		matrix.Data[i] = (rand.Float64() * 2) - 1
+	}
+	for i := 0; i < b.N; i++ {
+		MinEigs(matrix)
 	}
 }
