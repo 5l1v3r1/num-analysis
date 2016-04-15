@@ -9,9 +9,11 @@ I am learning some Numerical Analysis from [video lectures](https://www.youtube.
  * [linalg/cholesky](linalg/cholesky/) - decompose symmetric positive-definite matrices using Cholesky factorization.
  * [linalg/qrdecomp](linalg/qrdecomp/) - decompose any matrix A into QR using various methods.
  * [linalg/leastsquares](linalg/leastsquares) - use QR decomposition for more stable least-squares approximations.
- * [linalg/eigen](linalg/eigen) - approximate the eigenpairs of symmetric matrices.
+ * [linalg/eigen](linalg/eigen) - approximate the eigenpairs of some matrices.
  * [linalg/svd](linalg/svd) - compute Singular Value Decompositions of matrices.
  * [realroots](realroots) - approximate the roots of arbitrary single-variable functions.
+ * [mvroots](mvroots) - approximate the roots of multi-variable functions and complex polynomials.
  * [unitcircles](unitcircles/) - a simple HTML app to visualize different p-norms.
  * [regression](regression/) - basic regression using least squares.
  * [imagealign](imagealign/) - align a crooked image to a reference image using least squares.
+ * [newton-basins](newton-basins/) - visualize the "Newton Basins" of polynomials.
