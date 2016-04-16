@@ -21,6 +21,8 @@ func SolvePrec(t LinTran, b linalg.Vector, prec float64) linalg.Vector {
 	var residual linalg.Vector
 	var solution linalg.Vector
 
+	var lastResidualDot float64
+
 	residual = b
 	solution = make(linalg.Vector, t.Dim())
 
@@ -30,9 +32,11 @@ func SolvePrec(t LinTran, b linalg.Vector, prec float64) linalg.Vector {
 		}
 		if i == 0 {
 			conjVec = residual.Copy()
+			lastResidualDot = conjVec.Dot(conjVec)
 		} else {
-			// TODO: derive more efficient formula for projecting conjVec onto residual.
-			projAmount := residual.Dot(t.Apply(conjVec)) / conjVec.Dot(t.Apply(conjVec))
+			residualDot := residual.Dot(residual)
+			projAmount := -residualDot / lastResidualDot
+			lastResidualDot = residualDot
 			conjVec = residual.Copy().Add(conjVec.Scale(-projAmount))
 		}
 		if allZero(conjVec) {
