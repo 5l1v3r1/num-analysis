@@ -2,10 +2,18 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
+	"sync"
+	"time"
 
 	"github.com/unixpickle/num-analysis/conjgrad"
+	"github.com/unixpickle/num-analysis/linalg"
 )
+
+const DescentThreshold = 1e-5
+const ConjGradThreshold = 1e-2
+const DescentTimeout = time.Second * 5
 
 type BlurGen func(w, h int) conjgrad.LinTran
 
@@ -70,7 +78,61 @@ func applyUnblur(in, out string, blurer BlurGen) error {
 	}
 	algo := blurer(img.Width, img.Height)
 	for i := 0; i < 3; i++ {
-		img.RGB[i] = conjgrad.SolvePrec(algo, img.RGB[i], 1e-2)
+		img.RGB[i] = optimize(img.RGB[i], algo)
 	}
 	return img.Write(out)
+}
+
+func optimize(data linalg.Vector, algo conjgrad.LinTran) linalg.Vector {
+	done := make(chan struct{}, 0)
+	solution := make(chan linalg.Vector, 2)
+
+	var wg sync.WaitGroup
+
+	wg.Add(2)
+
+	go func() {
+		timeout := time.After(DescentTimeout)
+		d := NewDescender(data, algo)
+		defer func() {
+			solution <- d.Guess()
+			wg.Done()
+		}()
+		for {
+			if d.Step() < DescentThreshold*float64(len(data)) {
+				break
+			}
+			select {
+			case <-timeout:
+				return
+			case <-done:
+				return
+			default:
+			}
+		}
+	}()
+
+	go func() {
+		defer wg.Done()
+		solution <- conjgrad.SolveStoppable(algo, data, ConjGradThreshold, done)
+	}()
+
+	s := <-solution
+	close(done)
+	wg.Wait()
+	s1 := <-solution
+
+	for _, sol := range []linalg.Vector{s, s1} {
+		for i, x := range sol {
+			sol[i] = math.Min(1, math.Max(0, x))
+		}
+	}
+
+	diff1 := algo.Apply(s).Scale(-1).Add(data)
+	diff2 := algo.Apply(s1).Scale(-1).Add(data)
+	if diff1.Dot(diff1) < diff2.Dot(diff2) {
+		return s
+	} else {
+		return s1
+	}
 }

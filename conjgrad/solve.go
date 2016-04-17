@@ -8,15 +8,21 @@ import (
 
 const residualUpdateFrequency = 20
 
-// SolvePrec solves a system of linear equations
-// t*x = b for x, where t is a symmetric
-// positive-definite linear transformation.
+// SolveStoppable solves a system of linear
+// equations t*x = b for x, where t is a
+// symmetric positive-definite operator.
 //
 // The prec argument specifies a bound on the
 // residual error of the solution. If the largest
 // element of (Ax-b) has an absolute value less than
 // prec, then the current x is returned.
-func SolvePrec(t LinTran, b linalg.Vector, prec float64) linalg.Vector {
+//
+// The cancelChan argument is a channel which you
+// can close to stop the solve early.
+// If the solve is cancelled, an approximate
+// solution is returned.
+func SolveStoppable(t LinTran, b linalg.Vector, prec float64,
+	cancelChan <-chan struct{}) linalg.Vector {
 	var conjVec linalg.Vector
 	var residual linalg.Vector
 	var solution linalg.Vector
@@ -50,9 +56,21 @@ func SolvePrec(t LinTran, b linalg.Vector, prec float64) linalg.Vector {
 		} else {
 			residual.Add(t.Apply(conjVec).Scale(-optimalDistance))
 		}
+
+		select {
+		case <-cancelChan:
+			return solution
+		default:
+		}
 	}
 
 	return solution
+}
+
+// SolvePrec is like SolveStoppable, but it does not
+// give you the option to cancel the solve early.
+func SolvePrec(t LinTran, b linalg.Vector, prec float64) linalg.Vector {
+	return SolveStoppable(t, b, prec, nil)
 }
 
 // Solve is like SolvePrec, except that it computes
