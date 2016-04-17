@@ -23,7 +23,7 @@ func SolvePrec(t LinTran, b linalg.Vector, prec float64) linalg.Vector {
 
 	var lastResidualDot float64
 
-	residual = b
+	residual = b.Copy()
 	solution = make(linalg.Vector, t.Dim())
 
 	for i := 0; i < t.Dim(); i++ {
