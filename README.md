@@ -17,3 +17,5 @@ I am learning some Numerical Analysis from [video lectures](https://www.youtube.
  * [regression](regression/) - basic regression using least squares.
  * [imagealign](imagealign/) - align a crooked image to a reference image using least squares.
  * [newton-basins](newton-basins/) - visualize the "Newton Basins" of polynomials.
+ * [conjgrad](conjgrad/) - basic Conjugate Gradient implementation.
+ * [blurify](blurify/) - blur or sharpen an image.
