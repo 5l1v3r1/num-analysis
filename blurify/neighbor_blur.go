@@ -15,8 +15,10 @@ func (n NeighborBlur) Dim() int {
 	return n.Width * n.Height
 }
 
-func (n NeighborBlur) Apply(v linalg.Vector) linalg.Vector {
-	res := make(linalg.Vector, len(v))
+func (n NeighborBlur) Apply(input linalg.Vector) linalg.Vector {
+	res := make(linalg.Vector, len(input))
+	v := make(linalg.Vector, len(input))
+	copy(v, input)
 	for i := 0; i < n.Applications; i++ {
 		for y := 0; y < n.Height; y++ {
 			for x := 0; x < n.Width; x++ {

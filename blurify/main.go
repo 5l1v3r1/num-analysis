@@ -1,7 +1,6 @@
 package main
 
 import (
-	"errors"
 	"fmt"
 	"os"
 
@@ -65,6 +64,13 @@ func applyBlur(in, out string, blurer BlurGen) error {
 }
 
 func applyUnblur(in, out string, blurer BlurGen) error {
-	// TODO: this.
-	return errors.New("unblur not yet implemented")
+	img, err := ReadImage(in)
+	if err != nil {
+		return err
+	}
+	algo := blurer(img.Width, img.Height)
+	for i := 0; i < 3; i++ {
+		img.RGB[i] = conjgrad.SolvePrec(algo, img.RGB[i], 1e-2)
+	}
+	return img.Write(out)
 }
