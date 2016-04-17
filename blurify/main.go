@@ -12,7 +12,7 @@ type BlurGen func(w, h int) conjgrad.LinTran
 
 var Blurers = map[string]BlurGen{
 	"neighbor": func(w, h int) conjgrad.LinTran {
-		return NeighborBlur{w, h}
+		return NeighborBlur{w, h, 2}
 	},
 }
 

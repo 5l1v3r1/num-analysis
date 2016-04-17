@@ -6,8 +6,9 @@ import "github.com/unixpickle/num-analysis/linalg"
 // averages pixels with their adjacent (but not
 // diagonally adjacent) pixels.
 type NeighborBlur struct {
-	Width  int
-	Height int
+	Width        int
+	Height       int
+	Applications int
 }
 
 func (n NeighborBlur) Dim() int {
@@ -16,55 +17,34 @@ func (n NeighborBlur) Dim() int {
 
 func (n NeighborBlur) Apply(v linalg.Vector) linalg.Vector {
 	res := make(linalg.Vector, len(v))
-	for y := 0; y < n.Height; y++ {
-		yEdge := y == 0 || y == n.Height-1
-		for x := 0; x < n.Width; x++ {
-			xEdge := x == 0 || x == n.Width-1
-			val := n.getPixel(v, x, y)
-			if !xEdge && !yEdge {
+	for i := 0; i < n.Applications; i++ {
+		for y := 0; y < n.Height; y++ {
+			for x := 0; x < n.Width; x++ {
+				val := n.getPixel(v, x, y)
 				val += n.getPixel(v, x, y+1)
 				val += n.getPixel(v, x, y-1)
 				val += n.getPixel(v, x-1, y)
 				val += n.getPixel(v, x+1, y)
 				val /= 5
-			} else if xEdge && yEdge {
-				if x == 0 {
-					val += n.getPixel(v, x+1, y)
-				} else {
-					val += n.getPixel(v, x-1, y)
-				}
-				if y == 0 {
-					val += n.getPixel(v, x, y+1)
-				} else {
-					val += n.getPixel(v, x, y-1)
-				}
-				val /= 3
-			} else if xEdge {
-				val += n.getPixel(v, x, y-1)
-				val += n.getPixel(v, x, y+1)
-				if x == 0 {
-					val += n.getPixel(v, x+1, y)
-				} else {
-					val += n.getPixel(v, x-1, y)
-				}
-				val /= 4
-			} else if yEdge {
-				val += n.getPixel(v, x-1, y)
-				val += n.getPixel(v, x+1, y)
-				if y == 0 {
-					val += n.getPixel(v, x, y+1)
-				} else {
-					val += n.getPixel(v, x, y-1)
-				}
-				val /= 4
+				n.setPixel(res, x, y, val)
 			}
-			n.setPixel(res, x, y, val)
 		}
+		copy(v, res)
 	}
 	return res
 }
 
 func (n NeighborBlur) getPixel(v linalg.Vector, x, y int) float64 {
+	if x < 0 {
+		x += n.Width
+	} else if x >= n.Width {
+		x = x - n.Width
+	}
+	if y < 0 {
+		y += n.Height
+	} else if y >= n.Height {
+		y = y - n.Height
+	}
 	return v[x+y*n.Width]
 }
 
