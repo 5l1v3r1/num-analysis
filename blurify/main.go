@@ -21,6 +21,11 @@ var Blurers = map[string]BlurGen{
 	"neighbor": func(w, h int) conjgrad.LinTran {
 		return NeighborBlur{w, h, 2}
 	},
+	"gaussian": func(w, h int) conjgrad.LinTran {
+		size := math.Max(float64(w), float64(h))
+		variance := size / 2000
+		return &GaussianBlur{w, h, int(math.Sqrt(variance)*10 + 0.5), variance}
+	},
 }
 
 func main() {
