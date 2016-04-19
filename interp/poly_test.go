@@ -45,6 +45,26 @@ func TestPolyCoefficients(t *testing.T) {
 	}
 }
 
+func BenchmarkPolyAdd(b *testing.B) {
+	polynomial := make([]float64, TestCoefficientsPolyDegree+1)
+	for i := range polynomial {
+		polynomial[i] = float64(i + 2)
+	}
+	var xs []float64
+	var ys []float64
+	for i := 0; i < TestCoefficientsPolyDegree+1; i++ {
+		xs = append(xs, float64(i)/float64(TestLargePolyDegree+1))
+		ys = append(ys, evaluatePolynomial(polynomial, xs[len(xs)-1]))
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N/(TestLargePolyDegree+1); i++ {
+		p := NewPoly()
+		for j, x := range xs {
+			p.Add(x, ys[j])
+		}
+	}
+}
+
 func testPolyDegree(t *testing.T, deg int) {
 	testPoly := make([]float64, deg+1)
 	for i := range testPoly {
