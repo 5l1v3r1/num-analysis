@@ -10,6 +10,7 @@ import (
 
 const TestSmallPolyDegree = 3
 const TestLargePolyDegree = 30
+const TestCoefficientsPolyDegree = 5
 
 func TestPolySmall(t *testing.T) {
 	testPolyDegree(t, TestSmallPolyDegree)
@@ -17,6 +18,31 @@ func TestPolySmall(t *testing.T) {
 
 func TestPolyLarge(t *testing.T) {
 	testPolyDegree(t, TestLargePolyDegree)
+}
+
+func TestPolyCoefficients(t *testing.T) {
+	polynomial := make([]float64, TestCoefficientsPolyDegree+1)
+	for i := range polynomial {
+		polynomial[i] = float64(i + 2)
+	}
+
+	p := NewPoly()
+	for i := 0; i < TestCoefficientsPolyDegree+1; i++ {
+		x := float64(i) / float64(TestCoefficientsPolyDegree+1)
+		p.Add(x, evaluatePolynomial(polynomial, x))
+	}
+
+	coeffs := p.Coefficients()
+	if len(coeffs) != len(polynomial) {
+		t.Fatal("invalid number of coefficients:", len(coeffs))
+	}
+
+	for i, actual := range coeffs {
+		expected := polynomial[i]
+		if math.Abs(actual-expected) > 1e-5 {
+			t.Error("expected", expected, "but got", actual, "for x ^", i)
+		}
+	}
 }
 
 func testPolyDegree(t *testing.T, deg int) {
