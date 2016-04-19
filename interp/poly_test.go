@@ -9,15 +9,10 @@ import (
 )
 
 const TestSmallPolyDegree = 3
-const TestMediumPolyDegree = 30
-const TestLargePolyDegree = 60
+const TestLargePolyDegree = 30
 
 func TestPolySmall(t *testing.T) {
 	testPolyDegree(t, TestSmallPolyDegree)
-}
-
-func TestPolyMedium(t *testing.T) {
-	testPolyDegree(t, TestMediumPolyDegree)
 }
 
 func TestPolyLarge(t *testing.T) {
