@@ -84,6 +84,7 @@ func applyUnblur(in, out string, blurer BlurGen) error {
 	algo := blurer(img.Width, img.Height)
 	for i := 0; i < 3; i++ {
 		img.RGB[i] = optimize(img.RGB[i], algo)
+		fmt.Println("done", i+1, "out of 3")
 	}
 	return img.Write(out)
 }
