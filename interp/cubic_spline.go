@@ -3,6 +3,9 @@ package interp
 import (
 	"fmt"
 	"sort"
+
+	"github.com/unixpickle/num-analysis/linalg"
+	"github.com/unixpickle/num-analysis/linalg/ludecomp"
 )
 
 // A SplineStyle determines how the shape of
@@ -95,6 +98,7 @@ func (c *CubicSpline) computeStandardSlope(idx int) float64 {
 	} else if last := len(c.x) - 1; idx == last {
 		return (c.y[last] - c.y[last-1]) / (c.x[last] - c.x[last-1])
 	}
+	// TODO: simplify this formula.
 	mx1 := (c.x[idx-1] + c.x[idx]) / 2
 	mx2 := (c.x[idx] + c.x[idx+1]) / 2
 	my1 := (c.y[idx-1] + c.y[idx]) / 2
@@ -107,8 +111,23 @@ func (c *CubicSpline) computeMonotoneSlope(idx int) float64 {
 	panic("monotone cubic splines not yet implemented.")
 }
 
-func (c *CubicSpline) updateFunc(idx int) float64 {
-	// TODO: do some algebra here to generate a cubic polynomial
-	// that goes through two points with two slopes.
-	panic("todo: this.")
+func (c *CubicSpline) updateFunc(idx int) {
+	// TODO: use a closed-form solution to this
+	// system to improve performance.
+	x0 := c.x[idx]
+	x1 := c.x[idx+1]
+	system := &linalg.Matrix{
+		Rows: 4,
+		Cols: 4,
+		Data: []float64{
+			1, x0, x0 * x0, x0 * x0 * x0,
+			1, x1, x1 * x1, x1 * x1 * x1,
+			0, 1, 2 * x0, 3 * x0 * x0,
+			0, 1, 2 * x1, 3 * x1 * x1,
+		},
+	}
+	solutions := linalg.Vector{c.y[idx], c.y[idx+1], c.slopes[idx], c.slopes[idx+1]}
+	lu := ludecomp.Decompose(system)
+	solution := lu.Solve(solutions)
+	c.funcs[idx] = CubicFunc{solution[0], solution[1], solution[2], solution[3]}
 }
