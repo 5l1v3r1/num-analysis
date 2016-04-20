@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/unixpickle/num-analysis/kahan"
 	"github.com/unixpickle/num-analysis/linalg"
 	"github.com/unixpickle/num-analysis/linalg/ludecomp"
 )
@@ -32,6 +33,21 @@ const (
 // correspond to a + bx + cx^2 + dx^3.
 type CubicFunc [4]float64
 
+// Eval evaluates the cubic function at a
+// point x.
+func (f CubicFunc) Eval(x float64) float64 {
+	sum := kahan.NewSummer64()
+	prod := 1.0
+	for _, coeff := range f[:] {
+		sum.Add(coeff * prod)
+		prod *= x
+	}
+	return sum.Sum()
+}
+
+// A CubicSpline is a piecewise function made up of
+// cubic components, designed to have be continuous
+// up to the first derivative.
 type CubicSpline struct {
 	style  SplineStyle
 	x      []float64
@@ -40,10 +56,13 @@ type CubicSpline struct {
 	funcs  []CubicFunc
 }
 
+// NewCubicSpline creates a CubicSpline with no pieces.
 func NewCubicSpline(style SplineStyle) *CubicSpline {
 	return &CubicSpline{style: style}
 }
 
+// Add adds a point to the cubic spline, generating
+// a new piece and affecting old pieces in the process.
 func (c *CubicSpline) Add(x, y float64) {
 	idx := sort.SearchFloat64s(c.x, x)
 
@@ -77,6 +96,24 @@ func (c *CubicSpline) Add(x, y float64) {
 			c.updateFunc(idx + 1)
 		}
 	}
+}
+
+// Eval evaluates the cubic spline at a given point.
+func (c *CubicSpline) Eval(x float64) float64 {
+	if yCount := len(c.y); yCount == 1 {
+		return c.y[0]
+	} else if yCount == 0 {
+		return 0
+	}
+
+	idx := sort.SearchFloat64s(c.x, x) - 1
+	if idx < 0 {
+		idx = 0
+	} else if idx >= len(c.funcs) {
+		idx = len(c.funcs) - 1
+	}
+
+	return c.funcs[idx].Eval(x)
 }
 
 func (c *CubicSpline) updateSlope(idx int) float64 {
