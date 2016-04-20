@@ -98,7 +98,7 @@ func (c *CubicSpline) Add(x, y float64) {
 		}
 	}
 	if idx < len(c.slopes)-1 {
-		c.updateSlope(idx+1)
+		c.updateSlope(idx + 1)
 		c.updateFunc(idx)
 		if idx < len(c.slopes)-2 {
 			c.updateFunc(idx + 1)
@@ -161,12 +161,7 @@ func (c *CubicSpline) computeStandardSlope(idx int) float64 {
 	} else if last := len(c.x) - 1; idx == last {
 		return (c.y[last] - c.y[last-1]) / (c.x[last] - c.x[last-1])
 	}
-	// TODO: simplify this formula.
-	mx1 := (c.x[idx-1] + c.x[idx]) / 2
-	mx2 := (c.x[idx] + c.x[idx+1]) / 2
-	my1 := (c.y[idx-1] + c.y[idx]) / 2
-	my2 := (c.y[idx] + c.y[idx+1]) / 2
-	return (my2 - my1) / (mx2 - mx1)
+	return (c.y[idx+1] - c.y[idx-1]) / (c.x[idx+1] - c.x[idx-1])
 }
 
 func (c *CubicSpline) computeMonotoneSlope(idx int) float64 {
