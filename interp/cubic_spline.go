@@ -21,6 +21,12 @@ const (
 	// of spline without any unusual properties.
 	StandardStyle SplineStyle = iota
 
+	// MidArcStyle generates a spline whose slopes
+	// are computed using the two points on either
+	// side of a given point without considering
+	// the point itself.
+	MidArcStyle
+
 	// MonotoneStyle forces the generated spline
 	// to retain the original data's monotonicity.
 	MonotoneStyle
@@ -145,6 +151,8 @@ func (c *CubicSpline) updateSlope(idx int) {
 	switch c.style {
 	case StandardStyle:
 		c.slopes[idx] = c.computeStandardSlope(idx)
+	case MidArcStyle:
+		c.slopes[idx] = c.computeMidArcSlope(idx)
 	case MonotoneStyle:
 		c.slopes[idx] = c.computeMonotoneSlope(idx)
 	default:
@@ -153,6 +161,20 @@ func (c *CubicSpline) updateSlope(idx int) {
 }
 
 func (c *CubicSpline) computeStandardSlope(idx int) float64 {
+	if len(c.x) < 2 {
+		return 0
+	}
+	if idx == 0 {
+		return (c.y[1] - c.y[0]) / (c.x[1] - c.x[0])
+	} else if last := len(c.x) - 1; idx == last {
+		return (c.y[last] - c.y[last-1]) / (c.x[last] - c.x[last-1])
+	}
+	m1 := (c.y[idx] - c.y[idx-1]) / (c.x[idx] - c.x[idx-1])
+	m2 := (c.y[idx+1] - c.y[idx]) / (c.x[idx+1] - c.x[idx])
+	return (m1 + m2) / 2
+}
+
+func (c *CubicSpline) computeMidArcSlope(idx int) float64 {
 	if len(c.x) < 2 {
 		return 0
 	}
