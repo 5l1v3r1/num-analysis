@@ -98,7 +98,7 @@ func (c *CubicSpline) Add(x, y float64) {
 		}
 	}
 	if idx < len(c.slopes)-1 {
-		c.updateSlope(idx)
+		c.updateSlope(idx+1)
 		c.updateFunc(idx)
 		if idx < len(c.slopes)-2 {
 			c.updateFunc(idx + 1)

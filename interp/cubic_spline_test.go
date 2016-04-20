@@ -2,6 +2,7 @@ package interp
 
 import (
 	"math"
+	"sort"
 	"testing"
 )
 
@@ -34,12 +35,42 @@ func testStandardSpline(t *testing.T, xs, ys []float64) {
 				t.Errorf("got %f expected %f at %f", actual, expected, x1)
 			}
 		}
+		sortedX, sortedY := sortedValues(xs[:i+1], ys[:i+1])
 		for j := 1; j < i; j++ {
-			slope := (ys[j+1] - ys[j-1]) / (xs[j+1] - xs[j-1])
-			actual := s.Deriv(xs[j])
+			slope := (sortedY[j+1] - sortedY[j-1]) / (sortedX[j+1] - sortedX[j-1])
+			theX := sortedX[j]
+			actual := s.Deriv(theX)
 			if math.Abs(actual - slope) > 1e-5 || math.IsNaN(actual) {
-				t.Errorf("got slope %f expected %f at %f", actual, slope, xs[j])
+				t.Errorf("got slope %f expected %f at %f", actual, slope, theX)
 			}
 		}
 	}
+}
+
+func sortedValues(x, y []float64) ([]float64, []float64) {
+	res1 := make([]float64, len(x))
+	res2 := make([]float64, len(y))
+	copy(res1, x)
+	copy(res2, y)
+	p := &sortablePairs{res1, res2}
+	sort.Sort(p)
+	return p.X, p.Y
+}
+
+type sortablePairs struct {
+	X []float64
+	Y []float64
+}
+
+func (s *sortablePairs) Len() int {
+	return len(s.X)
+}
+
+func (s *sortablePairs) Less(i, j int) bool {
+	return s.X[i] < s.X[j]
+}
+
+func (s *sortablePairs) Swap(i, j int) {
+	s.X[i], s.X[j] = s.X[j], s.X[i]
+	s.Y[i], s.Y[j] = s.Y[j], s.Y[i]
 }
