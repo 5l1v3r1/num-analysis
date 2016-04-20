@@ -45,6 +45,12 @@ func (f CubicFunc) Eval(x float64) float64 {
 	return sum.Sum()
 }
 
+// Deriv evaluates the derivative of the
+// cubic function at a point x.
+func (f CubicFunc) Deriv(x float64) float64 {
+	return f[1] + 2*f[2]*x + 3*f[3]*x*x
+}
+
 // A CubicSpline is a piecewise function made up of
 // cubic components, designed to have be continuous
 // up to the first derivative.
@@ -78,7 +84,9 @@ func (c *CubicSpline) Add(x, y float64) {
 
 	if len(c.x) > 1 {
 		c.funcs = append(c.funcs, CubicFunc{})
-		copy(c.funcs[:idx+1], c.funcs[:idx])
+		if idx != len(c.funcs) {
+			copy(c.funcs[idx+1:], c.funcs[idx:])
+		}
 	}
 
 	c.updateSlope(idx)
@@ -116,14 +124,32 @@ func (c *CubicSpline) Eval(x float64) float64 {
 	return c.funcs[idx].Eval(x)
 }
 
-func (c *CubicSpline) updateSlope(idx int) float64 {
+// Deriv evaluates the derivative of the cubic
+// spline at a given point.
+func (c *CubicSpline) Deriv(x float64) float64 {
+	if len(c.y) < 2 {
+		return 0
+	}
+
+	idx := sort.SearchFloat64s(c.x, x) - 1
+	if idx < 0 {
+		idx = 0
+	} else if idx >= len(c.funcs) {
+		idx = len(c.funcs) - 1
+	}
+
+	return c.funcs[idx].Deriv(x)
+}
+
+func (c *CubicSpline) updateSlope(idx int) {
 	switch c.style {
 	case StandardStyle:
 		c.slopes[idx] = c.computeStandardSlope(idx)
 	case MonotoneStyle:
 		c.slopes[idx] = c.computeMonotoneSlope(idx)
+	default:
+		panic(fmt.Sprintf("unknown style: %d", c.style))
 	}
-	panic(fmt.Sprintf("unknown style: %d", c.style))
 }
 
 func (c *CubicSpline) computeStandardSlope(idx int) float64 {
