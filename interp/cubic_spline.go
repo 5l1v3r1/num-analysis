@@ -74,7 +74,6 @@ func (c *CubicSpline) Add(x, y float64) {
 			c.updateFunc(idx + 1)
 		}
 	}
-	c.updateFunc(idx)
 }
 
 func (c *CubicSpline) updateSlope(idx int) float64 {
