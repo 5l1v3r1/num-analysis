@@ -2,8 +2,11 @@ package interp
 
 import (
 	"math"
+	"math/rand"
 	"sort"
 	"testing"
+
+	"github.com/unixpickle/num-analysis/kahan"
 )
 
 type slopeComputer func(xs, ys []float64) float64
@@ -79,6 +82,23 @@ func testAnySpline(t *testing.T, xs, ys []float64, style SplineStyle, slopeComp 
 			}
 		}
 	}
+
+	minX := xs[0]
+	maxX := xs[0]
+	for _, x := range xs {
+		minX = math.Min(minX, x)
+		maxX = math.Max(maxX, x)
+	}
+	for i := 0; i < 100; i++ {
+		x1 := rand.Float64()*(maxX-minX) + minX
+		x2 := rand.Float64()*(maxX-minX) + minX
+		actual := s.Integ(x1, x2)
+		expected := reimannSum(s, x1, x2)
+		if math.IsNaN(actual) || math.Abs(actual-expected) > 1e-2 {
+			t.Errorf("got integral %f when expected %f on interval [%f,%f]",
+				actual, expected, x1, x2)
+		}
+	}
 }
 
 func sortedValues(x, y []float64) ([]float64, []float64) {
@@ -107,4 +127,15 @@ func (s *sortablePairs) Less(i, j int) bool {
 func (s *sortablePairs) Swap(i, j int) {
 	s.X[i], s.X[j] = s.X[j], s.X[i]
 	s.Y[i], s.Y[j] = s.Y[j], s.Y[i]
+}
+
+func reimannSum(f *CubicSpline, x1, x2 float64) float64 {
+	if x1 > x2 {
+		return -reimannSum(f, x2, x1)
+	}
+	sum := kahan.NewSummer64()
+	for x := x1; x < x2; x += 1e-3 {
+		sum.Add(1e-3 * f.Eval(x))
+	}
+	return sum.Sum()
 }

@@ -57,6 +57,19 @@ func (f CubicFunc) Deriv(x float64) float64 {
 	return f[1] + 2*f[2]*x + 3*f[3]*x*x
 }
 
+// Integ evaluates the definite integral
+// of this function on an interval.
+func (f CubicFunc) Integ(x1, x2 float64) float64 {
+	return f.indefIntegral(x2) - f.indefIntegral(x1)
+}
+
+func (f CubicFunc) indefIntegral(x float64) float64 {
+	x2 := x * x
+	x3 := x2 * x
+	x4 := x3 * x
+	return f[0]*x + 1.0/2.0*f[1]*x2 + 1.0/3.0*f[2]*x3 + 1.0/4.0*f[3]*x4
+}
+
 // A CubicSpline is a piecewise function made up of
 // cubic components, designed to have be continuous
 // up to the first derivative.
@@ -120,13 +133,7 @@ func (c *CubicSpline) Eval(x float64) float64 {
 		return 0
 	}
 
-	idx := sort.SearchFloat64s(c.x, x) - 1
-	if idx < 0 {
-		idx = 0
-	} else if idx >= len(c.funcs) {
-		idx = len(c.funcs) - 1
-	}
-
+	idx := c.funcIndexForX(x)
 	return c.funcs[idx].Eval(x)
 }
 
@@ -137,14 +144,50 @@ func (c *CubicSpline) Deriv(x float64) float64 {
 		return 0
 	}
 
+	idx := c.funcIndexForX(x)
+	return c.funcs[idx].Deriv(x)
+}
+
+// Integ evaluates the definite integral of the
+// cubic spline on an interval.
+func (c *CubicSpline) Integ(x1, x2 float64) float64 {
+	if x1 == x2 {
+		return 0
+	} else if x1 > x2 {
+		return -c.Integ(x2, x1)
+	}
+	if l := len(c.y); l == 1 {
+		return c.y[0] * (x2 - x1)
+	} else if l == 0 {
+		return 0
+	}
+
+	startIdx := c.funcIndexForX(x1)
+	endIdx := c.funcIndexForX(x2)
+
+	sum := kahan.NewSummer64()
+	for i := startIdx; i <= endIdx; i++ {
+		startX := c.x[i]
+		endX := c.x[i+1]
+		if i == startIdx {
+			startX = x1
+		}
+		if i == endIdx {
+			endX = x2
+		}
+		sum.Add(c.funcs[i].Integ(startX, endX))
+	}
+	return sum.Sum()
+}
+
+func (c *CubicSpline) funcIndexForX(x float64) int {
 	idx := sort.SearchFloat64s(c.x, x) - 1
 	if idx < 0 {
 		idx = 0
 	} else if idx >= len(c.funcs) {
 		idx = len(c.funcs) - 1
 	}
-
-	return c.funcs[idx].Deriv(x)
+	return idx
 }
 
 func (c *CubicSpline) updateSlope(idx int) {
