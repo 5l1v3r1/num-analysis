@@ -47,6 +47,20 @@ func TestStandardSplineUnordered(t *testing.T) {
 	testStandardSpline(t, xs, ys)
 }
 
+func BenchmarkStandardSplineAdd(b *testing.B) {
+	s := NewCubicSpline(StandardStyle)
+	xs := make([]float64, b.N)
+	ys := make([]float64, b.N)
+	for i := 0; i < b.N; i++ {
+		xs[i] = rand.Float64()
+		ys[i] = rand.Float64()
+	}
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		s.Add(xs[i], ys[i])
+	}
+}
+
 func testMidArcSpline(t *testing.T, xs, ys []float64) {
 	testAnySpline(t, xs, ys, MidArcStyle, func(x, y []float64) float64 {
 		return (y[2] - y[0]) / (x[2] - x[0])
