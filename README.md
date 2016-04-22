@@ -19,3 +19,5 @@ I am learning some Numerical Analysis from [video lectures](https://www.youtube.
  * [newton-basins](newton-basins/) - visualize the "Newton Basins" of polynomials.
  * [conjgrad](conjgrad/) - basic Conjugate Gradient implementation.
  * [blurify](blurify/) - blur or sharpen an image.
+ * [interp](interp/) - various interpolation algorithms.
+ * [interp/visualizer](interp/visualizer) - visualize interpolations.

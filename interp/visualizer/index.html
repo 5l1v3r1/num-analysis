@@ -1,0 +1,28 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,
+                                   user-scalable=no">
+    <title>Interpolation Visualizer</title>
+    <link rel="stylesheet" type="text/css" href="assets/style.css">
+    <script src="build/src.js"></script>
+  </head>
+  <body>
+    <h1>Coming soon</h1>
+
+    <select id="technique">
+      <option value="poly">Polynomial</option>
+      <option value="std-spline">Cubic Spline</option>
+      <option value="midarc-spline">Midpoint Cubic Spline</option>
+    </select>
+
+    <button id="reset-button">Reset</button>
+
+    <svg id="drawing" viewBox="0 0 1 1">
+      <path id="interpolated-line" stroke="black" fill="none"
+            stroke-width="0.01" d="" />
+      <g id="interpolation-points" fill="red"></g>
+    </svg>
+  </body>
+</html>
