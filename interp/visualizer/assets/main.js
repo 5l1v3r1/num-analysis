@@ -1,23 +1,29 @@
 (function() {
 
   var drawing = null;
-  var INTERP_STEP = 0.005;
-  var INTERP_COUNT = 201;
+  var $techniqueDropdown = null;
 
   function initialize() {
+    $techniqueDropdown = $('#technique');
+    $techniqueDropdown.change(interpolate);
     drawing = new window.Drawing();
     drawing.onPointAdded = interpolate;
+    $('#reset-button').click(drawing.clear.bind(drawing));
   }
 
   function interpolate() {
     var xs = drawing.getPointXs();
     var ys = drawing.getPointYs();
+
+    var interpCount = Math.ceil(drawing.getWidth() + 1);
+    var interpStep = 1 / (interpCount - 1);
+
     var interpXs = [];
-    for (var i = 0; i < INTERP_COUNT; ++i) {
-      interpXs.push(i*INTERP_STEP);
+    for (var i = 0; i < interpCount; ++i) {
+      interpXs.push(i * interpStep);
     }
-    var interpYs = window.interpolate('poly', xs, ys, 0, INTERP_STEP, INTERP_COUNT);
-    console.log(interpYs);
+    var method = $techniqueDropdown.val();
+    var interpYs = window.interpolate(method, xs, ys, 0, interpStep, interpCount);
     drawing.setInterpolatedLine(interpXs, interpYs);
   }
 
