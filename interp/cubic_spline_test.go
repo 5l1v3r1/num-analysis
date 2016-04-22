@@ -55,6 +55,7 @@ func BenchmarkStandardSplineAdd(b *testing.B) {
 		xs[i] = rand.Float64()
 		ys[i] = rand.Float64()
 	}
+	sort.Float64s(xs)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		s.Add(xs[i], ys[i])
