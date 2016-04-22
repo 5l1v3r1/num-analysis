@@ -41,7 +41,7 @@ func TestStandardSplineBackwards(t *testing.T) {
 	testStandardSpline(t, xs, ys)
 }
 
-func TesStandardSplineUnordered(t *testing.T) {
+func TestStandardSplineUnordered(t *testing.T) {
 	xs := []float64{7, 3.25, 1, 9, 3, 6, 5, 2}
 	ys := []float64{2, 3, 5, 4, 6, 7, 7, 4}
 	testStandardSpline(t, xs, ys)
