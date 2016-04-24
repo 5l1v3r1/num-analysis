@@ -11,6 +11,7 @@ func main() {
 	window := js.Global.Get("window")
 	window.Set("getMeshDimensions", js.MakeFunc(GetMeshDimensions))
 	window.Set("getMeshCoords", js.MakeFunc(GetMeshCoords))
+	window.Set("getMeshEdges", js.MakeFunc(GetMeshEdges))
 	window.Set("moveMeshNode", js.MakeFunc(MoveMeshNode))
 }
 
@@ -25,6 +26,28 @@ func GetMeshCoords(this *js.Object, args []*js.Object) interface{} {
 		coords[i*2+1] = x.Position.Y
 	}
 	return coords
+}
+
+func GetMeshEdges(this *js.Object, args []*js.Object) interface{} {
+	var edges []int
+
+	nodeIdx := map[*MeshNode]int{}
+	for i, node := range GlobalMesh {
+		nodeIdx[node] = i
+	}
+
+	seenNodes := map[*MeshNode]bool{}
+	for i, node := range GlobalMesh {
+		seenNodes[node] = true
+		for _, neighbor := range node.Neighbors {
+			if seenNodes[neighbor] {
+				continue
+			}
+			edges = append(edges, i, nodeIdx[neighbor])
+		}
+	}
+
+	return edges
 }
 
 func MoveMeshNode(this *js.Object, args []*js.Object) interface{} {
