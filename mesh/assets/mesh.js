@@ -61,7 +61,7 @@
   MeshView.prototype._registerMouseEvents = function() {
     var draggingNode = -1;
     this._element.addEventListener('mousedown', function(e) {
-      var rect = this._element.getBoundingClientRect();
+      var rect = this._boundingRect();
       var x = (e.clientX - rect.left) / rect.width;
       var y = (e.clientY - rect.top) / rect.height;
       var nodes = getMeshCoords();
@@ -85,12 +85,25 @@
       if (draggingNode < 0) {
         return;
       }
-      var rect = this._element.getBoundingClientRect();
+      var rect = this._boundingRect();
       var x = (e.clientX - rect.left) / rect.width;
       var y = (e.clientY - rect.top) / rect.height;
       window.moveMeshNode(draggingNode, x, y);
       this.update();
     }.bind(this));
+  };
+
+  MeshView.prototype._boundingRect = function() {
+    var rect = this._element.getBoundingClientRect();
+    rect = {width: rect.width, height: rect.height, left: rect.left, top: rect.top};
+    if (rect.width > rect.height) {
+      rect.left += (rect.width - rect.height) / 2;
+      rect.width = rect.height;
+    } else {
+      rect.top += (rect.height - rect.width) / 2;
+      rect.height = rect.width;
+    }
+    return rect;
   };
 
   function edgesAndNodes() {
