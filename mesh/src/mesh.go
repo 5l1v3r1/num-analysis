@@ -45,13 +45,15 @@ func NewMeshGrid(size int) []*MeshNode {
 				if y < 0 || y == size {
 					continue
 				}
-				for x := j - 1; x <= j+1; x++ {
-					if x < 0 || x == size {
-						continue
-					}
-					neighbor := res[y*size+x]
-					node.Neighbors = append(node.Neighbors, neighbor)
+				neighbor := res[y*size+j]
+				node.Neighbors = append(node.Neighbors, neighbor)
+			}
+			for x := j - 1; x <= j+1; x++ {
+				if x < 0 || x == size {
+					continue
 				}
+				neighbor := res[i*size+x]
+				node.Neighbors = append(node.Neighbors, neighbor)
 			}
 		}
 	}
