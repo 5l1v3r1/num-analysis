@@ -2,7 +2,7 @@ package main
 
 import "github.com/gopherjs/gopherjs/js"
 
-const MeshDimensions = 5
+const MeshDimensions = 10
 
 var GlobalMesh []*MeshNode
 

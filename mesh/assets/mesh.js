@@ -1,8 +1,8 @@
 (function() {
 
   var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
-  var CIRCLE_RADIUS = 0.1;
-  var EDGE_THICKNESS = 0.05;
+  var CIRCLE_RADIUS = 0.025;
+  var EDGE_THICKNESS = 0.015;
 
   function MeshView() {
     this._element = document.getElementById('mesh');
@@ -29,6 +29,7 @@
     }
 
     this.update();
+    this._registerMouseEvents();
   }
 
   MeshView.prototype.update = function() {
@@ -55,6 +56,41 @@
       node.setAttribute('cx', x);
       node.setAttribute('cy', y);
     }
+  };
+
+  MeshView.prototype._registerMouseEvents = function() {
+    var draggingNode = -1;
+    this._element.addEventListener('mousedown', function(e) {
+      var rect = this._element.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width;
+      var y = (e.clientY - rect.top) / rect.height;
+      var nodes = getMeshCoords();
+      var closestDist = Infinity;
+      var closest = -1;
+      for (var i = 0, len = nodes.length/2; i < len; ++i) {
+        var nx = nodes[i * 2];
+        var ny = nodes[i*2 + 1];
+        var dist = Math.sqrt(Math.pow(nx-x, 2) + Math.pow(ny-y, 2));
+        if (dist < closestDist) {
+          closestDist = dist;
+          closest = i;
+        }
+      }
+      draggingNode = closest;
+    }.bind(this));
+    this._element.addEventListener('mouseup', function(e) {
+      draggingNode = -1;
+    });
+    this._element.addEventListener('mousemove', function(e) {
+      if (draggingNode < 0) {
+        return;
+      }
+      var rect = this._element.getBoundingClientRect();
+      var x = (e.clientX - rect.left) / rect.width;
+      var y = (e.clientY - rect.top) / rect.height;
+      window.moveMeshNode(draggingNode, x, y);
+      this.update();
+    }.bind(this));
   };
 
   function edgesAndNodes() {
