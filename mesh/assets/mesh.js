@@ -2,7 +2,7 @@
 
   var SVG_NAMESPACE = 'http://www.w3.org/2000/svg';
   var CIRCLE_RADIUS = 0.025;
-  var EDGE_THICKNESS = 0.015;
+  var EDGE_THICKNESS = 0.01;
 
   function MeshView() {
     this._element = document.getElementById('mesh');
