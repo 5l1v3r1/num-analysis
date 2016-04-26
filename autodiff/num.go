@@ -32,18 +32,6 @@ func NewNumVar(val float64, gradSize int, varIdx int) Num {
 	return res
 }
 
-func (n Num) Less(n1 Num) bool {
-	return n.Value < n1.Value
-}
-
-func (n Num) Equal(n1 Num) bool {
-	return n.Value == n1.Value
-}
-
-func (n Num) Greater(n1 Num) bool {
-	return n.Value > n1.Value
-}
-
 func (n Num) Add(n1 Num) Num {
 	res := NewNum(n.Value+n1.Value, len(n.Gradient))
 	for i, x := range n1.Gradient {
