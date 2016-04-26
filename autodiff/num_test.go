@@ -35,6 +35,20 @@ func TestNumPow(t *testing.T) {
 	testNumericalValue(t, value, 7.32609e-100, []float64{2.11586e-99, -4.37957e-98})
 }
 
+func TestNumFuncs(t *testing.T) {
+	// There are two variables, x0 and x1.
+	// We will compute x0*sqrt(exp(x1*x0*sin(2cos(x1))))
+	// Where x0=2 and x1=3.
+
+	x0 := NewNumVar(2, 2, 0)
+	x1 := NewNumVar(3, 2, 1)
+	const2 := NewNum(2, 2)
+
+	value := x0.Mul(x1.Cos().Mul(const2).Sin().Mul(x0).Mul(x1).Exp().Sqrt())
+
+	testNumericalValue(t, value, 0.127558, []float64{-0.111762, -0.0740555})
+}
+
 func testNumericalValue(t *testing.T, v Num, expected float64, grad []float64) {
 	if math.Abs((v.Value-expected)/expected) > 1e-5 {
 		t.Error("value should be", expected, "but got", v.Value)
