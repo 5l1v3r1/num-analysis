@@ -11,13 +11,12 @@ type Num interface {
 	Sub(Num) Num
 	Mul(Num) Num
 	Div(Num) Num
+	Pow(Num) Num
 
 	Reciprocal() Num
 	Sqrt() Num
 	Sin() Num
 	Cos() Num
 	Exp() Num
-
-	Pow(c float64) Num
-	PowNum(Num) Num
+	PowScaler(c float64) Num
 }

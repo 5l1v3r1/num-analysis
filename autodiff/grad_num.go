@@ -1,5 +1,7 @@
 package autodiff
 
+import "math"
+
 // GradNum is a float64-backed Num that
 // stores a value and the value's gradient
 // with respect to any number of variables.
@@ -43,45 +45,78 @@ func (n GradNum) Greater(n1 Num) bool {
 }
 
 func (n GradNum) Add(n1 Num) Num {
-	panic("TODO")
+	res := NewGradNum(n.Value+n1.(GradNum).Value, len(n.Gradient))
+	for i, x := range n1.(GradNum).Gradient {
+		res.Gradient[i] = x + n.Gradient[i]
+	}
+	return res
 }
 
 func (n GradNum) Sub(n1 Num) Num {
-	panic("TODO")
+	res := NewGradNum(n.Value-n1.(GradNum).Value, len(n.Gradient))
+	for i, x := range n1.(GradNum).Gradient {
+		res.Gradient[i] = -x + n.Gradient[i]
+	}
+	return res
 }
 
 func (n GradNum) Mul(n1 Num) Num {
-	panic("TODO")
+	gn1 := n1.(GradNum)
+	res := NewGradNum(n.Value*gn1.Value, len(n.Gradient))
+	for i, x := range gn1.Gradient {
+		res.Gradient[i] = x*n.Value + gn1.Value*n.Gradient[i]
+	}
+	return res
 }
 
 func (n GradNum) Div(n1 Num) Num {
-	panic("TODO")
+	return n.Mul(n1.Reciprocal())
+}
+
+func (n GradNum) Pow(n1 Num) Num {
+	gn1 := n1.(GradNum)
+	res := NewGradNum(math.Pow(n.Value, gn1.Value), len(n.Gradient))
+
+	basePart := res.Value * (gn1.Value / n.Value)
+	powerPart := res.Value * math.Log(n.Value)
+
+	for i, x := range gn1.Gradient {
+		res.Gradient[i] = basePart*n.Gradient[i] + powerPart*x
+	}
+
+	return res
 }
 
 func (n GradNum) Reciprocal() Num {
-	panic("TODO")
+	return n.chainRule(1/n.Value, -1.0/(n.Value*n.Value))
 }
 
 func (n GradNum) Sqrt() Num {
-	panic("TODO")
+	sqrt := math.Sqrt(n.Value)
+	return n.chainRule(sqrt, 1/(2*sqrt))
 }
 
 func (n GradNum) Sin() Num {
-	panic("TODO")
+	return n.chainRule(math.Sin(n.Value), math.Cos(n.Value))
 }
 
 func (n GradNum) Cos() Num {
-	panic("TODO")
+	return n.chainRule(math.Cos(n.Value), -math.Sin(n.Value))
 }
 
 func (n GradNum) Exp() Num {
-	panic("TODO")
+	exp := math.Exp(n.Value)
+	return n.chainRule(exp, exp)
 }
 
-func (n GradNum) Pow(c float64) Num {
-	panic("TODO")
+func (n GradNum) PowScaler(c float64) Num {
+	return n.chainRule(math.Pow(n.Value, c), c*math.Pow(n.Value, c-1))
 }
 
-func (n GradNum) PowNum(n1 Num) Num {
-	panic("TODO")
+func (n GradNum) chainRule(newVal, opDerivative float64) Num {
+	res := NewGradNum(newVal, len(n.Gradient))
+	for i, fPrime := range n.Gradient {
+		res.Gradient[i] = opDerivative * fPrime
+	}
+	return res
 }
