@@ -2,119 +2,117 @@ package autodiff
 
 import "math"
 
-// GradNum is a float64-backed Num that
+// Num is a float64-backed numeric that
 // stores a value and the value's gradient
 // with respect to any number of variables.
-type GradNum struct {
+type Num struct {
 	Value    float64
 	Gradient []float64
 }
 
-// NewGradNum creates a GradNum given a
-// value and the dimension of the gradient.
+// NewNum creates a Num given a value and
+// the dimension of a gradient.
 // The gradient will be set to 0, making
-// the resulting GradNum a constant value.
-func NewGradNum(val float64, gradSize int) GradNum {
-	res := GradNum{
+// the resulting Num a "constant" value.
+func NewNum(val float64, gradSize int) Num {
+	res := Num{
 		Value:    val,
 		Gradient: make([]float64, gradSize),
 	}
 	return res
 }
 
-// NewGradNumVar is like NewGradNum, but it
+// NewNumVar is like NewNum, but it
 // sets one element of the gradient to 1,
 // thus representing one of the variables in
 // the gradient.
-func NewGradNumVar(val float64, gradSize int, varIdx int) GradNum {
-	res := NewGradNum(val, gradSize)
+func NewNumVar(val float64, gradSize int, varIdx int) Num {
+	res := NewNum(val, gradSize)
 	res.Gradient[varIdx] = 1
 	return res
 }
 
-func (n GradNum) Less(n1 Num) bool {
-	return n.Value < n1.(GradNum).Value
+func (n Num) Less(n1 Num) bool {
+	return n.Value < n1.Value
 }
 
-func (n GradNum) Equal(n1 Num) bool {
-	return n.Value == n1.(GradNum).Value
+func (n Num) Equal(n1 Num) bool {
+	return n.Value == n1.Value
 }
 
-func (n GradNum) Greater(n1 Num) bool {
-	return n.Value > n1.(GradNum).Value
+func (n Num) Greater(n1 Num) bool {
+	return n.Value > n1.Value
 }
 
-func (n GradNum) Add(n1 Num) Num {
-	res := NewGradNum(n.Value+n1.(GradNum).Value, len(n.Gradient))
-	for i, x := range n1.(GradNum).Gradient {
+func (n Num) Add(n1 Num) Num {
+	res := NewNum(n.Value+n1.Value, len(n.Gradient))
+	for i, x := range n1.Gradient {
 		res.Gradient[i] = x + n.Gradient[i]
 	}
 	return res
 }
 
-func (n GradNum) Sub(n1 Num) Num {
-	res := NewGradNum(n.Value-n1.(GradNum).Value, len(n.Gradient))
-	for i, x := range n1.(GradNum).Gradient {
+func (n Num) Sub(n1 Num) Num {
+	res := NewNum(n.Value-n1.Value, len(n.Gradient))
+	for i, x := range n1.Gradient {
 		res.Gradient[i] = -x + n.Gradient[i]
 	}
 	return res
 }
 
-func (n GradNum) Mul(n1 Num) Num {
-	gn1 := n1.(GradNum)
-	res := NewGradNum(n.Value*gn1.Value, len(n.Gradient))
-	for i, x := range gn1.Gradient {
-		res.Gradient[i] = x*n.Value + gn1.Value*n.Gradient[i]
+func (n Num) Mul(n1 Num) Num {
+	res := NewNum(n.Value*n1.Value, len(n.Gradient))
+	for i, x := range n1.Gradient {
+		res.Gradient[i] = x*n.Value + n1.Value*n.Gradient[i]
 	}
 	return res
 }
 
-func (n GradNum) Div(n1 Num) Num {
+func (n Num) Div(n1 Num) Num {
 	return n.Mul(n1.Reciprocal())
 }
 
-func (n GradNum) Pow(n1 Num) Num {
-	gn1 := n1.(GradNum)
-	res := NewGradNum(math.Pow(n.Value, gn1.Value), len(n.Gradient))
+func (n Num) Pow(n1 Num) Num {
+	res := NewNum(math.Pow(n.Value, n1.Value), len(n.Gradient))
 
-	basePart := res.Value * (gn1.Value / n.Value)
+	basePart := res.Value * (n1.Value / n.Value)
 	powerPart := res.Value * math.Log(n.Value)
 
-	for i, x := range gn1.Gradient {
+	for i, x := range n1.Gradient {
 		res.Gradient[i] = basePart*n.Gradient[i] + powerPart*x
 	}
 
 	return res
 }
 
-func (n GradNum) Reciprocal() Num {
+func (n Num) Reciprocal() Num {
 	return n.chainRule(1/n.Value, -1.0/(n.Value*n.Value))
 }
 
-func (n GradNum) Sqrt() Num {
+func (n Num) Sqrt() Num {
 	sqrt := math.Sqrt(n.Value)
 	return n.chainRule(sqrt, 1/(2*sqrt))
 }
 
-func (n GradNum) Sin() Num {
+func (n Num) Sin() Num {
 	return n.chainRule(math.Sin(n.Value), math.Cos(n.Value))
 }
 
-func (n GradNum) Cos() Num {
+func (n Num) Cos() Num {
 	return n.chainRule(math.Cos(n.Value), -math.Sin(n.Value))
 }
 
-func (n GradNum) Exp() Num {
+func (n Num) Exp() Num {
 	exp := math.Exp(n.Value)
 	return n.chainRule(exp, exp)
 }
 
-func (n GradNum) PowScaler(c float64) Num {
+func (n Num) PowScaler(c float64) Num {
 	return n.chainRule(math.Pow(n.Value, c), c*math.Pow(n.Value, c-1))
 }
 
-func (n GradNum) chainRule(newVal, opDerivative float64) Num {
-	res := NewGradNum(newVal, len(n.Gradient))
+func (n Num) chainRule(newVal, opDerivative float64) Num {
+	res := NewNum(newVal, len(n.Gradient))
 	for i, fPrime := range n.Gradient {
 		res.Gradient[i] = opDerivative * fPrime
 	}
