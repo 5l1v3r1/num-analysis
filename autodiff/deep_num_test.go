@@ -50,7 +50,7 @@ func testDeepNumValue(t *testing.T, d *DeepNum, expected []float64) {
 			t.Error("not enough values: expected", len(expected), "but got", i)
 			return
 		}
-		if math.Abs((d.Value-x)/x) > 1e-5 {
+		if math.IsNaN(d.Value) || math.Abs((d.Value-x)/x) > 1e-5 {
 			t.Errorf("invalid value %d: expected %f but got %f", i, x, d.Value)
 		}
 		d = d.Deriv
