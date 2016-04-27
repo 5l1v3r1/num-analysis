@@ -31,6 +31,17 @@ func NewDeepNumVar(val float64, n int) *DeepNum {
 	return &DeepNum{Value: val, Deriv: NewDeepNum(1, n-1)}
 }
 
+// Depth returns the number of derivatives
+// stored in d.
+func (d *DeepNum) Depth() int {
+	res := 0
+	for d.Deriv != nil {
+		res++
+		d = d.Deriv
+	}
+	return res
+}
+
 func (d *DeepNum) Add(d1 *DeepNum) *DeepNum {
 	sum := &DeepNum{Value: d.Value + d1.Value}
 	if d.Deriv != nil && d1.Deriv != nil {
