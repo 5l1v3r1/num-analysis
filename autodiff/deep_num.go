@@ -1,5 +1,7 @@
 package autodiff
 
+import "math"
+
 // A DeepNum is a numeric with zero
 // or more derivatives.
 type DeepNum struct {
@@ -57,12 +59,44 @@ func (d *DeepNum) Div(d1 *DeepNum) *DeepNum {
 	return d.Mul(d1.Reciprocal())
 }
 
+func (d *DeepNum) Pow(d1 *DeepNum) *DeepNum {
+	lessD := d.removeOneDerivative()
+	lessD1 := d1.removeOneDerivative()
+	value := lessD.Pow(lessD1)
+
+	res := &DeepNum{Value: value.Value}
+	if d.Deriv != nil && d1.Deriv != nil {
+		basePart := value.Mul(lessD1.Div(lessD))
+		powerPart := value.Mul(lessD.Log())
+		res.Deriv = d.Deriv.Mul(basePart).Add(d1.Deriv.Mul(powerPart))
+	}
+
+	return res
+}
+
 func (d *DeepNum) Reciprocal() *DeepNum {
 	recip := &DeepNum{Value: 1.0 / d.Value}
 	if d.Deriv != nil {
-		recip.Deriv = d.Deriv.Div(d.Mul(d).removeOneDerivative()).MulScaler(-1)
+		lessD := d.removeOneDerivative()
+		recip.Deriv = d.Deriv.Div(lessD.Mul(lessD)).MulScaler(-1)
 	}
 	return recip
+}
+
+func (d *DeepNum) Log() *DeepNum {
+	res := &DeepNum{Value: math.Log(d.Value)}
+	if d.Deriv != nil {
+		res.Deriv = d.Deriv.Div(d)
+	}
+	return nil
+}
+
+func (d *DeepNum) PowScaler(c float64) *DeepNum {
+	res := &DeepNum{Value: math.Pow(d.Value, c)}
+	if d.Deriv != nil {
+		res.Deriv = d.Deriv.Mul(d.removeOneDerivative().PowScaler(c - 1).MulScaler(c))
+	}
+	return res
 }
 
 func (d *DeepNum) MulScaler(c float64) *DeepNum {
