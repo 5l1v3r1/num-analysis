@@ -106,6 +106,50 @@ func (d *DeepNum) Log() *DeepNum {
 	return res
 }
 
+func (d *DeepNum) Sqrt() *DeepNum {
+	if d.Deriv == nil {
+		return &DeepNum{Value: math.Sqrt(d.Value)}
+	}
+	subSqrt := d.removeOneDerivative().Sqrt()
+	res := &DeepNum{Value: subSqrt.Value}
+	res.Deriv = d.Deriv.Div(subSqrt.MulScaler(2))
+	return res
+}
+
+func (d *DeepNum) Sin() *DeepNum {
+	res := &DeepNum{Value: math.Sin(d.Value)}
+	if d.Deriv == nil {
+		return res
+	}
+	// TODO: optimize this by looping and alternating
+	// between sin, cos, -sin, -cos, since all the
+	// derivatives only require two computations in
+	// total.
+	res.Deriv = d.Deriv.Mul(res.removeOneDerivative().Cos())
+	return res
+}
+
+func (d *DeepNum) Cos() *DeepNum {
+	res := &DeepNum{Value: math.Sin(d.Value)}
+	if d.Deriv == nil {
+		return res
+	}
+	// TODO: see comment in Sin().
+	res.Deriv = d.Deriv.Mul(res.removeOneDerivative().Cos()).MulScaler(-1)
+	return res
+}
+
+func (d *DeepNum) Exp() *DeepNum {
+	if d.Deriv == nil {
+		return &DeepNum{Value: math.Exp(d.Value)}
+	}
+	subExp := d.removeOneDerivative().Exp()
+	return &DeepNum{
+		Value: subExp.Value,
+		Deriv: subExp.Mul(d.Deriv),
+	}
+}
+
 func (d *DeepNum) PowScaler(c float64) *DeepNum {
 	res := &DeepNum{Value: math.Pow(d.Value, c)}
 	if d.Deriv != nil {
