@@ -125,17 +125,17 @@ func (d *DeepNum) Sin() *DeepNum {
 	// between sin, cos, -sin, -cos, since all the
 	// derivatives only require two computations in
 	// total.
-	res.Deriv = d.Deriv.Mul(res.removeOneDerivative().Cos())
+	res.Deriv = d.Deriv.Mul(d.removeOneDerivative().Cos())
 	return res
 }
 
 func (d *DeepNum) Cos() *DeepNum {
-	res := &DeepNum{Value: math.Sin(d.Value)}
+	res := &DeepNum{Value: math.Cos(d.Value)}
 	if d.Deriv == nil {
 		return res
 	}
 	// TODO: see comment in Sin().
-	res.Deriv = d.Deriv.Mul(res.removeOneDerivative().Cos()).MulScaler(-1)
+	res.Deriv = d.Deriv.Mul(d.removeOneDerivative().Sin()).MulScaler(-1)
 	return res
 }
 

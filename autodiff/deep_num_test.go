@@ -34,6 +34,16 @@ func TestDeepNumExponentials(t *testing.T) {
 	testDeepNumValue(t, value, []float64{1.0 / 9.0, -1.05062, 7.90147, -38.0578})
 }
 
+func TestDeepNumFunctions(t *testing.T) {
+	// We will compute the expression
+	// sin(sqrt(x^3 + 2x)) where x=3.
+
+	x := NewDeepNumVar(3, 3)
+
+	value := x.PowScaler(3).Add(x.MulScaler(2)).Sqrt().Sin()
+	testDeepNumValue(t, value, []float64{-0.512954, 2.16675, 3.66096, -12.0968})
+}
+
 func testDeepNumValue(t *testing.T, d *DeepNum, expected []float64) {
 	for i, x := range expected {
 		if d == nil {
