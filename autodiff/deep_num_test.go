@@ -21,13 +21,26 @@ func TestDeepNumArithmetic(t *testing.T) {
 	testDeepNumValue(t, sum, []float64{135.0, 75.0 / 2.0, 19.0 / 2.0, 15.0 / 4.0})
 }
 
+func TestDeepNumExponentials(t *testing.T) {
+	// We will compute the expression
+	// (x+2)^(-x^3-3x^2+x+1) where x=1.
+
+	x := NewDeepNumVar(1, 3)
+
+	base := x.AddScaler(2)
+	exponent := x.PowScaler(3).MulScaler(-1).Sub(x.PowScaler(2).MulScaler(3)).Add(x).AddScaler(1)
+	value := base.Pow(exponent)
+
+	testDeepNumValue(t, value, []float64{1.0 / 9.0, -1.05062, 7.90147, -38.0578})
+}
+
 func testDeepNumValue(t *testing.T, d *DeepNum, expected []float64) {
 	for i, x := range expected {
 		if d == nil {
 			t.Error("not enough values: expected", len(expected), "but got", i)
 			return
 		}
-		if math.Abs(d.Value-x)/x > 1e-5 {
+		if math.Abs((d.Value-x)/x) > 1e-5 {
 			t.Errorf("invalid value %d: expected %f but got %f", i, x, d.Value)
 		}
 		d = d.Deriv

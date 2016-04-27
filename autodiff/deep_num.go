@@ -60,6 +60,10 @@ func (d *DeepNum) Div(d1 *DeepNum) *DeepNum {
 }
 
 func (d *DeepNum) Pow(d1 *DeepNum) *DeepNum {
+	if d.Deriv == nil || d1.Deriv == nil {
+		return &DeepNum{Value: math.Pow(d.Value, d1.Value)}
+	}
+
 	lessD := d.removeOneDerivative()
 	lessD1 := d1.removeOneDerivative()
 	value := lessD.Pow(lessD1)
@@ -88,7 +92,7 @@ func (d *DeepNum) Log() *DeepNum {
 	if d.Deriv != nil {
 		res.Deriv = d.Deriv.Div(d)
 	}
-	return nil
+	return res
 }
 
 func (d *DeepNum) PowScaler(c float64) *DeepNum {
