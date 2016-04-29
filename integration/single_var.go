@@ -108,7 +108,7 @@ func polynomialIntegralWeights(spacing float64, degree int) []float64 {
 		}
 	}
 	integrals := make(linalg.Vector, numSamples)
-	for d := 1; d <= degree; d++ {
+	for d := range integrals {
 		integrals[d] = 1 / float64(d+1) * math.Pow(spacing, float64(d+1))
 	}
 	coefficients := ludecomp.Decompose(system).Solve(integrals)
