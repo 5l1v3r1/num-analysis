@@ -13,9 +13,13 @@ func PowerSeries(d DeepFunc, center float64, degree int) []float64 {
 	res := make([]float64, degree+1)
 	value := NewDeepNumVar(center, degree)
 	output := d(value)
+
+	factorial := 1.0
 	for i := range res {
-		res[i] = output.Value
+		res[i] = output.Value / factorial
 		output = output.Deriv
+		factorial *= float64(i + 1)
 	}
+
 	return res
 }
