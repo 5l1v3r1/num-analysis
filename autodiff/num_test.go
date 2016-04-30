@@ -33,6 +33,11 @@ func TestNumPow(t *testing.T) {
 	value := x0.Add(x1).Pow(x0.Mul(const2).Sub(x1.PowScaler(2)))
 
 	testNumericalValue(t, value, 7.32609e-100, []float64{2.11586e-99, -4.37957e-98})
+
+	// We will compute x0^0 x0=0.
+	x0 = NewNumVar(0, 2, 0)
+	value = x0.PowScaler(0)
+	testNumericalValue(t, value, 1, []float64{0, 0})
 }
 
 func TestNumFuncs(t *testing.T) {
@@ -56,7 +61,7 @@ func testNumericalValue(t *testing.T, v Num, expected float64, grad []float64) {
 
 	for i, ex := range grad {
 		actual := v.Gradient[i]
-		if math.Abs((actual-ex)/ex) > 1e-5 {
+		if math.IsNaN(actual) || math.Abs((actual-ex)/ex) > 1e-5 {
 			t.Error("partial", i, "should be", ex, "but got", actual)
 		}
 	}

@@ -151,6 +151,9 @@ func (d *DeepNum) Exp() *DeepNum {
 }
 
 func (d *DeepNum) PowScaler(c float64) *DeepNum {
+	if c == 0 {
+		return NewDeepNum(1, d.Depth())
+	}
 	res := &DeepNum{Value: math.Pow(d.Value, c)}
 	if d.Deriv != nil {
 		res.Deriv = d.Deriv.Mul(d.removeOneDerivative().PowScaler(c - 1).MulScaler(c))

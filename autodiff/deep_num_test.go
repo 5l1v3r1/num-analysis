@@ -32,6 +32,12 @@ func TestDeepNumExponentials(t *testing.T) {
 	value := base.Pow(exponent)
 
 	testDeepNumValue(t, value, []float64{1.0 / 9.0, -1.05062, 7.90147, -38.0578})
+
+	// We will compute the expression x^0
+	// where x=0.
+	x = NewDeepNumVar(1, 3)
+	zero := NewDeepNum(0, 3)
+	testDeepNumValue(t, x.Pow(zero), []float64{1, 0, 0, 0})
 }
 
 func TestDeepNumSinSqrt(t *testing.T) {
@@ -52,6 +58,13 @@ func TestDeepNumCosExpSqrt(t *testing.T) {
 
 	value := x.PowScaler(2).MulScaler(-1).AddScaler(5).Sqrt().Exp().AddScaler(1).Cos()
 	testDeepNumValue(t, value, []float64{0.999464, -0.155474, -22.5907, -17.2192})
+}
+
+func TestDeepNumNormalDist(t *testing.T) {
+	// Compute e^(-x^2) where x=0.
+	x := NewDeepNumVar(0, 4)
+	value := x.PowScaler(2).MulScaler(-1).Exp()
+	testDeepNumValue(t, value, []float64{1, 0, -2, 0, 12})
 }
 
 func testDeepNumValue(t *testing.T, d *DeepNum, expected []float64) {

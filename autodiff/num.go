@@ -96,6 +96,9 @@ func (n Num) Exp() Num {
 }
 
 func (n Num) PowScaler(c float64) Num {
+	if c == 0 {
+		return NewNum(1, len(n.Gradient))
+	}
 	return n.chainRule(math.Pow(n.Value, c), c*math.Pow(n.Value, c-1))
 }
 
