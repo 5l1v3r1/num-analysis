@@ -21,3 +21,5 @@ I am learning some Numerical Analysis from [video lectures](https://www.youtube.
  * [blurify](blurify/) - blur or sharpen an image.
  * [interp](interp/) - various interpolation algorithms.
  * [interp/visualizer](interp/visualizer) - visualize interpolations.
+ * [integration](integration) - numerical integration using polynomial approximations.
+ * [autodiff](autodiff) - a basic automatic differentiation system.
