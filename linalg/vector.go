@@ -51,3 +51,13 @@ func (v Vector) Add(v1 Vector) Vector {
 func (v Vector) Mag() float64 {
 	return math.Sqrt(v.Dot(v))
 }
+
+// MaxAbs returns the max of the absolute values
+// of every component in the vector.
+func (v Vector) MaxAbs() float64 {
+	var res float64
+	for _, x := range v {
+		res = math.Max(res, math.Abs(x))
+	}
+	return res
+}
