@@ -127,6 +127,31 @@ func (m *Matrix) Mul(m1 *Matrix) *Matrix {
 	return res
 }
 
+// MulFast is like Mul, but it prioritizes speed
+// over numerical accuracy.
+func (m *Matrix) MulFast(m1 *Matrix) *Matrix {
+	if m.Cols != m1.Rows {
+		panic("dimension mismatch")
+	}
+	res := &Matrix{
+		Rows: m.Rows,
+		Cols: m1.Cols,
+		Data: make([]float64, m.Rows*m1.Cols),
+	}
+	dataIdx := 0
+	for i := 0; i < res.Rows; i++ {
+		for j := 0; j < res.Cols; j++ {
+			var sum float64
+			for k := 0; k < m.Cols; k++ {
+				sum += m.Get(i, k) * m1.Get(k, j)
+			}
+			res.Data[dataIdx] = sum
+			dataIdx++
+		}
+	}
+	return res
+}
+
 // Transpose returns a new matrix which represents
 // the transpose of m.
 func (m *Matrix) Transpose() *Matrix {
