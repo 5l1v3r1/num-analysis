@@ -23,6 +23,19 @@ func (v Vector) Dot(v1 Vector) float64 {
 	return summer.Sum()
 }
 
+// DotFast is like Dot, but it values speed
+// over numerical accuracy.
+func (v Vector) DotFast(v1 Vector) float64 {
+	if len(v) != len(v1) {
+		panic("dimension mismatch")
+	}
+	var sum float64
+	for i, x := range v {
+		sum += x * v1[i]
+	}
+	return sum
+}
+
 // Copy returns a copy of this vector.
 func (v Vector) Copy() Vector {
 	res := make(Vector, len(v))
