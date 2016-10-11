@@ -74,3 +74,37 @@ func (v Vector) MaxAbs() float64 {
 	}
 	return res
 }
+
+// Max returns the value and index of the maximum
+// component in the vector.
+func (v Vector) Max() (float64, int) {
+	if len(v) == 0 {
+		return 0, 0
+	}
+	max := v[0]
+	idx := 0
+	for i := 1; i < len(v); i++ {
+		if v[i] > max {
+			max = v[i]
+			idx = i
+		}
+	}
+	return max, idx
+}
+
+// Min returns the value and index of the minimum
+// component in the vector.
+func (v Vector) Min() (float64, int) {
+	if len(v) == 0 {
+		return 0, 0
+	}
+	min := v[0]
+	idx := 0
+	for i := 1; i < len(v); i++ {
+		if v[i] < min {
+			min = v[i]
+			idx = i
+		}
+	}
+	return min, idx
+}
