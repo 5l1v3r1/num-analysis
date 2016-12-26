@@ -1,10 +1,6 @@
 package conjgrad
 
-import (
-	"math"
-
-	"github.com/unixpickle/num-analysis/linalg"
-)
+import "github.com/unixpickle/num-analysis/linalg"
 
 const residualUpdateFrequency = 20
 
@@ -32,10 +28,7 @@ func SolveStoppable(t LinTran, b linalg.Vector, prec float64,
 	residual = b.Copy()
 	solution = make(linalg.Vector, t.Dim())
 
-	for i := 0; i < t.Dim(); i++ {
-		if greatestValue(residual) <= prec {
-			break
-		}
+	for i := 0; residual.MaxAbs() > prec; i++ {
 		if i == 0 {
 			conjVec = residual.Copy()
 			lastResidualDot = conjVec.Dot(conjVec)
@@ -86,12 +79,4 @@ func allZero(v linalg.Vector) bool {
 		}
 	}
 	return true
-}
-
-func greatestValue(v linalg.Vector) float64 {
-	var max float64
-	for _, x := range v {
-		max = math.Max(max, math.Abs(x))
-	}
-	return max
 }
