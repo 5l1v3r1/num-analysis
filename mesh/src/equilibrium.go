@@ -8,7 +8,7 @@ import (
 func Equilibriate(nodes []*MeshNode) {
 	tran := newMeshLinTran(nodes)
 	residual := residualForceVector(tran)
-	solution := conjgrad.Solve(tran, residual)
+	solution := conjgrad.SolvePrec(tran, nil, residual, 1e-5)
 
 	componentIdx := 0
 	for _, x := range nodes {

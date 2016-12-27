@@ -27,7 +27,43 @@ func TestSolve(t *testing.T) {
 	lt := MatLinTran{M: &problem}
 	b := linalg.Vector{0.3298532642882215, 0.0330271613168995, 0.7816739111835319,
 		0.2310847231465032, 0.3820560329158281}
-	solution := Solve(lt, b)
+	solution := SolvePrec(lt, nil, b, 1e-8)
+	realSolution := linalg.Vector{489.504834645279, -185.447583828038, 534.674948145785,
+		-1128.308042204228, 343.226374596134}
+	for i, x := range realSolution {
+		if actual := solution[i]; math.Abs(x-actual) > 1e-5 || math.IsNaN(actual) {
+			t.Error("expected solution", realSolution, "but got", solution)
+			break
+		}
+	}
+}
+
+func TestSolvePrecond(t *testing.T) {
+	problem := linalg.Matrix{
+		Rows: 5,
+		Cols: 5,
+		Data: []float64{
+			2.298579079508162, 0.429201370738324, 0.513159695114135, 0.890572491575309,
+			-0.917105776402277,
+			0.429201370738324, 5.342630790304731, 3.551802515565508, 1.540530879076629,
+			1.805946316093086,
+			0.513159695114135, 3.551802515565508, 3.846999494537341, 1.996350132566954,
+			1.759376365048858,
+			0.890572491575309, 1.540530879076629, 1.996350132566954, 1.558637048015492,
+			1.576812350190962,
+			-0.917105776402277, 1.805946316093086, 1.759376365048858, 1.576812350190962,
+			4.727648739788367,
+		},
+	}
+	cond := linalg.NewMatrix(5, 5)
+	for i := 0; i < 5; i++ {
+		cond.Set(i, i, 1/problem.Get(i, i))
+	}
+	lt := MatLinTran{M: &problem}
+	ct := MatLinTran{M: cond}
+	b := linalg.Vector{0.3298532642882215, 0.0330271613168995, 0.7816739111835319,
+		0.2310847231465032, 0.3820560329158281}
+	solution := SolvePrec(lt, ct, b, 1e-8)
 	realSolution := linalg.Vector{489.504834645279, -185.447583828038, 534.674948145785,
 		-1128.308042204228, 343.226374596134}
 	for i, x := range realSolution {

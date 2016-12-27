@@ -34,3 +34,13 @@ func (m MatLinTran) Apply(v linalg.Vector) linalg.Vector {
 	res := m.M.Mul(column)
 	return linalg.Vector(res.Data)
 }
+
+type identity struct{}
+
+func (_ identity) Dim() int {
+	return 0
+}
+
+func (_ identity) Apply(v linalg.Vector) linalg.Vector {
+	return v
+}

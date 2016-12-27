@@ -120,7 +120,7 @@ func optimize(data linalg.Vector, algo conjgrad.LinTran) linalg.Vector {
 
 	go func() {
 		defer wg.Done()
-		solution <- conjgrad.SolveStoppable(algo, data, ConjGradThreshold, done)
+		solution <- conjgrad.SolveStoppable(algo, nil, data, ConjGradThreshold, done)
 	}()
 
 	s := <-solution
