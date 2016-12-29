@@ -2,6 +2,7 @@ package linalg
 
 import (
 	"math"
+	"math/rand"
 
 	"github.com/unixpickle/num-analysis/kahan"
 )
@@ -9,6 +10,16 @@ import (
 // Vector is an ordered list of floating points
 // which can be manipulated like a vector.
 type Vector []float64
+
+// RandVector creates a vector with entries sampled from
+// the standard normal.
+func RandVector(size int) Vector {
+	res := make(Vector, size)
+	for i := range res {
+		res[i] = rand.NormFloat64()
+	}
+	return res
+}
 
 // Dot returns the dot product of two vectors.
 // The dimensions of v and v1 must match.
